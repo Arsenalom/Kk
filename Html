@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кликер Игра</title>
+    <style>
+        body { font-family: sans-serif; }
+        .screen { padding: 20px; text-align: center; }
+        .game-button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #gameCanvas { border: 1px solid black; cursor: pointer; margin: 20px auto; display: block; }
+        #leaderboardTable { margin: 20px auto; border-collapse: collapse; }
+        #leaderboardTable th, #leaderboardTable td { border: 1px solid black; padding: 8px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="greetingScreen" class="screen">
+        <h2>Добро пожаловать в игру Кликер!</h2>
+        <p>Инструкция: Нажимайте на круг как можно быстрее, чтобы набрать очки!</p>
+        <input type="text" id="playerName" placeholder="Введите ваше имя">
+        <button id="playButton" class="game-button">Играть</button>
+    </div>
+
+    <div id="gameScreen" class="screen hidden">
+        <h2 id="gamePlayerName">Игрок: <span></span></h2>
+        <div id="gameTimer">Время: 00:00</div>
+        <div id="gameScore">Счет: 0</div>
+        <canvas id="gameCanvas" width="150" height="150"></canvas>
+        <button id="exitButton" class="game-button">Выход</button>
+    </div>
+
+    <div id="resultsScreen" class="screen hidden">
+        <h2>Экран результатов</h2>
+        <table id="leaderboardTable">
+            <thead>
+                <tr>
+                    <th>Место</th>
+                    <th>Имя игрока</th>
+                    <th>Счет</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+        <button id="playAgainButton" class="game-button">Играть снова</button>
+    </div>
+
+    <script>
+        // --- Переменные и элементы ---
+        const greetingScreen = document.getElementById('greetingScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+
+        const playerNameInput = document.getElementById('playerName');
+        const playButton = document.getElementById('playButton');
+
+        const gamePlayerNameDisplay = document.querySelector('#gamePlayerName span');
+        const gameTimerDisplay = document.getElementById('gameTimer');
+        const gameScoreDisplay = document.getElementById('gameScore');
+        const gameCanvas = document.getElementById('gameCanvas');
+        const gameCtx = gameCanvas.getContext('2d');
+        const exitButton = document.getElementById('exitButton');
+
+        const leaderboardTableBody = document.querySelector('#leaderboardTable tbody');
+        const playAgainButton = document.getElementById('playAgainButton');
+
+        let playerName = '';
+        let gameScore = 0;
+        let gameTime = 0;
+        let timerInterval;
+        let clickCount = 0; // For score calculation
+
+        const circleRadius = 50;
+        const circleX = gameCanvas.width / 2;
+        const circleY = gameCanvas.height / 2;
+
+        let leaderboard = loadLeaderboard(); // Load leaderboard from localStorage on page load
+
+        // --- Функции отрисовки ---
+        function drawCircle() {
+            gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+            const gradient = gameCtx.createRadialGradient(circleX, circleY, 10, circleX, circleY, circleRadius);
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(1, 'red');
+            gameCtx.fillStyle = gradient;
+            gameCtx.beginPath();
+            gameCtx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
+            gameCtx.fill();
+        }
+
+        // --- Функции управления экранами ---
+        function showScreen(screenId) {
+            greetingScreen.classList.add('hidden');
+            gameScreen.classList.add('hidden');

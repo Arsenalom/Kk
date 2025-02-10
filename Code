@@ -1,0 +1,64 @@
+/* style.css */
+.container {
+    width: 800px;
+    margin: 50px auto;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.active {
+    display: block;
+}
+
+#welcomeScreen, #gameScreen, #resultsScreen {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#clickCircle {
+    width: 100px;
+    height: 100px;
+    background-color: red;
+    border-radius: 50%;
+    margin: 20px auto;
+    cursor: pointer;
+}
+
+#leaderboardTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#leaderboardTable th, #leaderboardTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#leaderboardTable th {
+    background-color: #f2f2f2;
+}
+
+#gameScreen {
+    position: relative; /* Для позиционирования pauseMessage */
+    /* ... другие стили для gameScreen ... */
+}
+#pauseMessage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+    display: none; /* Скрыто по умолчанию */
+    background-color: rgba(255, 255, 255, 0.8); /* Непрозрачный фон для лучшей видимости */
+    padding: 20px;
+    border-radius: 10px;
+}
+.paused { /* CSS класс для визуального эффекта паузы, например, затемнения */
+    opacity: 0.5;
+    pointer-events: none; /* Отключаем взаимодействие с элементами игры в паузе */
+}

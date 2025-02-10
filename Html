@@ -1,83 +1,27 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра на клики</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        #clickCircle {
-            width: 100px;
-            height: 100px;
-            background-color: red;
-            border-radius: 50%;
-            margin: 20px auto;
-            cursor: pointer;
-        }
-
-        #leaderboardTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        #leaderboardTable th, #leaderboardTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        #leaderboardTable th {
-            background-color: #f2f2f2;
-        }
-    </style>
-</head>
+    <title>Игра</title>
+    <link rel="stylesheet" href="style.css"> </head>
 <body>
     <div class="container">
-        <!-- Экран приветствия -->
-        <div id="welcomeScreen" class="screen active">
-            <h1>Игра на клики</h1>
+        <div id="welcomeScreen" class="active">
+            <h2>Добро пожаловать в игру!</h2>
             <input type="text" id="playerNameInput" placeholder="Введите ваше имя">
             <button id="startGameBtn">Начать игру</button>
         </div>
 
-        <!-- Экран игры -->
-        <div id="gameScreen" class="screen">
+        <div id="gameScreen">
             <h2 id="playerNameDisplay">Игрок: </h2>
             <div id="timerDisplay">00:00</div>
             <div id="scoreDisplay">Счет: 0</div>
             <div id="clickCircle"></div>
+            <div id="pauseMessage">Пауза</div>
             <button id="exitGame">Выйти из игры</button>
         </div>
 
-        <!-- Экран результатов -->
-        <div id="resultsScreen" class="screen">
-            <h2>Таблица рекордов</h2>
+        <div id="resultsScreen">
+            <h2>Результаты игры</h2>
             <table id="leaderboardTable">
                 <thead>
                     <tr>
@@ -87,13 +31,11 @@
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody">
-                    <!-- Строки таблицы рекордов будут добавлены JavaScript -->
-                </tbody>
+                    </tbody>
             </table>
-            <button id="backToWelcome">Назад</button>
+            <button id="backToWelcome">В главное меню</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <script src="script.js"></script> </body>
 </html>

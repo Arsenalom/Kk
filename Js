@@ -1,104 +1,143 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // DOM элементы
-    const welcomeScreen = document.getElementById("welcomeScreen");
-    const gameScreen = document.getElementById("gameScreen");
-    const resultsScreen = document.getElementById("resultsScreen");
 
-    const playerNameInput = document.getElementById("playerNameInput");
-    const playerNameDisplay = document.getElementById("playerNameDisplay");
-    const startGameBtn = document.getElementById("startGameBtn");
-    const exitGameBtn = document.getElementById("exitGame");
-    const backToWelcomeBtn = document.getElementById("backToWelcome");
+const welcomeScreen = document.getElementById("welcomeScreen");
+const gameScreen = document.getElementById("gameScreen");
+const resultsScreen = document.getElementById("resultsScreen");
+const playerNameInput = document.getElementById("playerNameInput");
+const startGameBtn = document.getElementById("startGameBtn");
+const playerNameDisplay = document.getElementById("playerNameDisplay");
+const timerDisplay = document.getElementById("timerDisplay");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const clickCircle = document.getElementById("clickCircle");
+const leaderboardBody = document.getElementById("leaderboardBody");
+const pauseMessage = document.getElementById("pauseMessage"); // Получаем элемент сообщения о паузе
 
-    const timerDisplay = document.getElementById("timerDisplay");
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const clickCircle = document.getElementById("clickCircle");
+let playerName = "";
+let score = 0;
+let time = 0;
+let timerInterval;
+let gameDuration = 60; // Длительность игры в секундах (пример)
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+let isPaused = false; // Добавляем флаг паузы
+let startTime; // Время начала игры для отсчета прошедшего времени
 
-    const leaderboardBody = document.getElementById("leaderboardBody");
-
-    // Переменные игры
-    let playerName = "";
-    let score = 0;
-    let time = 0;
-    let timerInterval;
-    const gameDuration = 30; // Длительность игры в секундах
-    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || []; // Загрузка таблицы рекордов из localStorage
-
-    // Обработчики событий
-    startGameBtn.addEventListener("click", function() {
-        playerName = playerNameInput.value.trim();
-        if (playerName) {
-            welcomeScreen.classList.remove("active");
-            gameScreen.classList.add("active");
-            playerNameDisplay.textContent = `Игрок: ${playerName}`;
-            startGame();
-        } else {
-            alert("Введите ваше имя!");
-        }
-    });
-
-    exitGameBtn.addEventListener("click", function() {
-        endGame();
-    });
-
-    backToWelcomeBtn.addEventListener("click", function() {
-        resultsScreen.classList.remove("active");
-        welcomeScreen.classList.add("active");
-    });
-
-    // Логика игры
-    function startGame() {
-        score = 0;
-        time = 0;
-        scoreDisplay.textContent = "Счет: 0";
-        timerDisplay.textContent = "00:00";
-        clickCircle.addEventListener("click", handleClick);
-        timerInterval = setInterval(updateTimer, 1000);
+startGameBtn.addEventListener("click", function() {
+    playerName = playerNameInput.value.trim();
+    if (playerName) {
+        welcomeScreen.classList.remove("active");
+        gameScreen.classList.add("active");
+        playerNameDisplay.textContent = `Игрок: ${playerName}`;
+        startGame();
+    } else {
+        alert("Введите ваше имя!");
     }
+});
 
-    function handleClick() {
-        score++;
+document.getElementById("exitGame").addEventListener("click", function() {
+    endGame();
+});
+
+document.getElementById("backToWelcome").addEventListener("click", function() {
+    resultsScreen.classList.remove("active");
+    welcomeScreen.classList.add("active");
+});
+
+// Логика игры
+function startGame() {
+    score = 0;
+    time = 0;
+    scoreDisplay.textContent = "Счет: 0";
+    timerDisplay.textContent = "00:00";
+    startTime = Date.now(); // Записываем время начала игры
+    clickCircle.addEventListener("mousedown", handleClick); // Изменяем событие на mousedown
+    timerInterval = setInterval(updateTimer, 1000);
+    isPaused = false; // Убеждаемся, что игра не на паузе при старте
+    gameScreen.classList.remove('paused'); // Убираем класс паузы, если есть
+    pauseMessage.style.display = 'none'; // Скрываем сообщение о паузе
+}
+
+function handleClick(event) { // Добавляем event в параметры функции
+    if (!isPaused) { // Проверяем, не на паузе ли игра
+        if (event.button === 0) { // Левая кнопка мыши (button 0)
+            score += 5;
+        } else if (event.button === 2) { // Правая кнопка мыши (button 2)
+            score += 10;
+        }
         scoreDisplay.textContent = `Счет: ${score}`;
     }
+}
 
-    function updateTimer() {
-        time++;
-        const minutes = Math.floor(time / 60).toString().padStart(2, '0');
-        const seconds = (time % 60).toString().padStart(2, '0');
+function updateTimer() {
+    if (!isPaused) { // Обновляем таймер только если игра не на паузе
+        const elapsedTime = Date.now() - startTime; // Вычисляем прошедшее время
+        const totalSeconds = Math.floor(elapsedTime / 1000);
+        const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const seconds = (totalSeconds % 60).toString().padStart(2, '0');
         timerDisplay.textContent = `${minutes}:${seconds}`;
+        time = totalSeconds; // Обновляем переменную time для endGame (если нужно использовать time в секундах)
 
         if (time >= gameDuration) {
             endGame();
         }
     }
+}
 
-    function endGame() {
-        clearInterval(timerInterval);
-        clickCircle.removeEventListener("click", handleClick);
-        gameScreen.classList.remove("active");
-        resultsScreen.classList.add("active");
-        updateLeaderboard();
-    }
-
-    // Обновление таблицы рекордов
-    function updateLeaderboard() {
-        leaderboard.push({ name: playerName, score: score });
-        leaderboard.sort((a, b) => b.score - a.score);
-        leaderboard = leaderboard.slice(0, 5); // Оставляем только 5 лучших результатов
-        localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-
-        leaderboardBody.innerHTML = "";
-        leaderboard.forEach((entry, index) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.score}</td>
-            `;
-            leaderboardBody.appendChild(row);
-        });
-    }
-
-    // Инициализация таблицы рекордов при загрузке страницы
+function endGame() {
+    clearInterval(timerInterval);
+    clickCircle.removeEventListener("mousedown", handleClick); // Изменяем событие на mousedown
+    gameScreen.classList.remove("active");
+    resultsScreen.classList.add("active");
     updateLeaderboard();
+}
+
+// Обновление таблицы рекордов
+function updateLeaderboard() {
+    leaderboard.push({ name: playerName, score: score });
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 5); // Оставляем только 5 лучших результатов
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+    leaderboardBody.innerHTML = "";
+    leaderboard.forEach((entry, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.name}</td>
+            <td>${entry.score}</td>
+        `;
+        leaderboardBody.appendChild(row);
+    });
+}
+
+function pauseGame() {
+    isPaused = true;
+    clearInterval(timerInterval); // Останавливаем таймер
+    pauseMessage.style.display = 'block'; // Показываем сообщение о паузе
+    gameScreen.classList.add('paused'); // Добавляем класс для визуального эффекта паузы
+}
+
+function resumeGame() {
+    isPaused = false;
+    startTime = Date.now() - (time * 1000); // Корректируем startTime, чтобы время продолжалось правильно
+    timerInterval = setInterval(updateTimer, 1000); // Запускаем таймер снова
+    pauseMessage.style.display = 'none'; // Скрываем сообщение о паузе
+    gameScreen.classList.remove('paused'); // Убираем класс паузы
+}
+
+function togglePause() {
+    if (isPaused) {
+        resumeGame();
+    } else {
+        pauseGame();
+    }
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+        togglePause();
+    }
 });
+
+document.addEventListener('contextmenu', event => { // Отключаем контекстное меню правой кнопки по умолчанию
+    event.preventDefault();
+});
+        

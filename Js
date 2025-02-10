@@ -1,0 +1,107 @@
+            resultsScreen.classList.add('hidden');
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function startGame() {
+            playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                alert('Пожалуйста, введите имя игрока.');
+                return;
+            }
+
+            gamePlayerNameDisplay.textContent = playerName;
+            gameScore = 0;
+            gameTime = 0;
+            clickCount = 0;
+            gameScoreDisplay.textContent = 'Счет: ' + gameScore;
+            gameTimerDisplay.textContent = 'Время: 00:00';
+
+            drawCircle(); // Draw the circle initially
+
+            startTimer();
+            showScreen('gameScreen');
+        }
+
+        function endGame() {
+            stopTimer();
+            saveScore();
+            displayLeaderboard();
+            showScreen('resultsScreen');
+        }
+
+        // --- Таймер ---
+        function startTimer() {
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function updateTimer() {
+            gameTime++;
+            const minutes = Math.floor(gameTime / 60);
+            const seconds = gameTime % 60;
+            const formattedTime = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            gameTimerDisplay.textContent = 'Время: ' + formattedTime;
+        }
+
+        // --- Счет и клики ---
+        gameCanvas.addEventListener('click', function(event) {
+            const rect = gameCanvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            const distance = Math.sqrt((mouseX - circleX) * 2 + (mouseY - circleY) * 2);
+            if (distance <= circleRadius) {
+                gameScore += 1; // Increment score on click
+                gameScoreDisplay.textContent = 'Счет: ' + gameScore;
+            }
+        });
+
+
+        // --- Leaderboard ---
+        function loadLeaderboard() {
+            const storedLeaderboard = localStorage.getItem('leaderboard');
+            return storedLeaderboard ? JSON.parse(storedLeaderboard) : [];
+        }
+
+        function saveLeaderboard(leaderboardData) {
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboardData));
+        }
+
+        function saveScore() {
+            leaderboard.push({ name: playerName, score: gameScore });
+            leaderboard.sort((a, b) => b.score - a.score); // Sort by score descending
+            leaderboard = leaderboard.slice(0, 5); // Keep only top 5
+            saveLeaderboard(leaderboard);
+        }
+
+        function displayLeaderboard() {
+            leaderboardTableBody.innerHTML = ''; // Clear previous leaderboard
+
+            leaderboard.forEach((entry, index) => {
+                const row = leaderboardTableBody.insertRow();
+                const rankCell = row.insertCell(0);
+                const nameCell = row.insertCell(1);
+                const scoreCell = row.insertCell(2);
+
+                rankCell.textContent = index + 1;
+                nameCell.textContent = entry.name;
+                scoreCell.textContent = entry.score;
+            });
+        }
+
+        // --- Обработчики событий кнопок ---
+        playButton.addEventListener('click', startGame);
+        exitButton.addEventListener('click', endGame);
+        playAgainButton.addEventListener('click', function() {
+            showScreen('greetingScreen');
+            playerNameInput.value = ''; // Clear player name input for next game
+        });
+
+        // --- Инициализация ---
+        showScreen('greetingScreen'); // Show greeting screen initially
+        displayLeaderboard(); // Display leaderboard on page load
+
+    </script>

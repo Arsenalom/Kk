@@ -1,19 +1,48 @@
+<?php
+function calculateRoot($x, $n) {
+    if (!is_numeric($x) || !is_numeric($n)) {
+        return "Ошибка: Введите числовые значения для X и степени.";
+    }
+    if ($n == 0) {
+        return "Ошибка: Степень не может быть равна 0.";
+    }
+    if ($n % 2 == 0 && $x < 0) {
+        return "Ошибка: Невозможно вычислить корень четной степени из отрицательного числа в вещественных числах.";
+    }
+
+    return pow($x, 1/$n);
+}
+
+// Получаем значения из GET-параметров для тестирования через браузер
+$x = isset($_GET['x']) ? $_GET['x'] : null;
+$n = isset($_GET['n']) ? $_GET['n'] : null;
+$result = null;
+
+if ($x !== null && $n !== null) {
+    $result = calculateRoot($x, $n);
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Лабораторная работа 5</title>
+    <title>Вычисление корня степени</title>
 </head>
 <body>
-    <h1>Лабораторная работа 5</h1>
+    <h1>Вычисление корня степени</h1>
+    <form method="get">
+        <label for="x">Число X:</label>
+        <input type="text" name="x" id="x" value="<?php echo htmlspecialchars($x); ?>"><br><br>
 
-    <h2>Задание 5.1: Вычисление корня степени</h2>
-    <?php include 'task5_1.php'; ?>
+        <label for="n">Степень корня (n):</label>
+        <input type="text" name="n" id="n" value="<?php echo htmlspecialchars($n); ?>"><br><br>
 
-    <h2>Задание 5.2: Вычисление функции Y</h2>
-    <?php include 'task5_2.php'; ?>
+        <input type="submit" value="Вычислить корень">
+    </form>
 
-    <h2>Задание 5.3: Високосный год и дни в месяце</h2>
-    <?php include 'task5_3.php'; ?>
-
+    <?php if ($result !== null): ?>
+        <h2>Результат:</h2>
+        <p><?php echo $result; ?></p>
+    <?php endif; ?>
 </body>
 </html>

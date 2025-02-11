@@ -1,148 +1,54 @@
-// Элементы интерфейса
-const welcomeScreen = document.getElementById("welcomeScreen");
-const gameScreen = document.getElementById("gameScreen");
-const resultsScreen = document.getElementById("resultsScreen");
-const playerNameInput = document.getElementById("playerNameInput");
-const playerNameDisplay = document.getElementById("playerNameDisplay");
-const timerDisplay = document.getElementById("timerDisplay");
-const scoreDisplay = document.getElementById("scoreDisplay");
-const clickCircle = document.getElementById("clickCircle");
-const leaderboardBody = document.getElementById("leaderboardBody");
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест PHP</title>
+</head>
+<body>
 
-// Переменные игры
-let playerName = "";
-let score = 0;
-let time = 0;
-let timerInterval;
-let isPaused = false;
-const gameDuration = 60; // Длительность игры в секундах
+<?php
+// 5.1 Создание PHP-сценария
+echo '<p>Привет, мир!</p>'; // Выводим текст "Привет, мир!" в параграфе
+?>
 
-// Начало игры
-document.getElementById("startGame").addEventListener("click", function () {
-    playerName = playerNameInput.value.trim();
-    if (playerName) {
-        welcomeScreen.classList.remove("active");
-        gameScreen.classList.add("active");
-        playerNameDisplay.textContent = `Игрок: ${playerName}`;
-        startGame();
-    } else {
-        alert("Введите ваше имя!");
-    }
-});
+<?php
+// 5.2 Изолирование PHP-сценария
+$expression = true; // Задаем значение переменной $expression
 
-// Выход из игры
-document.getElementById("exitGame").addEventListener("click", function () {
-    endGame();
-});
+if ($expression == true): ?>
+    <p>Это будет отображено, если выражение истинно.</p>
+<?php else: ?>
+    <p>В ином случае будет отображено это.</p>
+<?php endif; ?>
 
-// Возврат на главный экран
-document.getElementById("backToWelcome").addEventListener("click", function () {
-    resultsScreen.classList.remove("active");
-    welcomeScreen.classList.add("active");
-});
+<?php
+// 5.3 Применение условия в PHP-сценарии
+$expression = false; // Меняем значение переменной для тестирования
 
-// Логика игры
-function startGame() {
-    score = 0;
-    time = 0;
-    scoreDisplay.textContent = "Счет: 0";
-    timerDisplay.textContent = "00:00";
-    clickCircle.addEventListener("click", handleClick);
-    clickCircle.addEventListener("contextmenu", function (event) {
-        event.preventDefault(); // Отключаем контекстное меню
-    });
-    timerInterval = setInterval(updateTimer, 1000);
+if ($expression == true) {
+    echo '<p>Это будет отображено, если выражение истинно.</p>'; // Вывод при true
+} else {
+    echo '<p>В ином случае будет отображено это.</p>'; // Вывод при false
 }
+?>
 
-// Обработка кликов
-function handleClick(event) {
-    if (!isPaused) {
-        if (event.button === 0) { // Левая кнопка мыши
-            score += 5;
-        } else if (event.button === 2) { // Правая кнопка мыши
-            score += 10;
-        }
-        scoreDisplay.textContent = `Счет: ${score}`;
-    }
-}
+<?php
+// 5.4 Объявление переменных
+$a = 5; // Присваиваем переменной $a значение 5
+$b = 10; // Присваиваем переменной $b значение 10
 
-// Обновление таймера
-function updateTimer() {
-    if (!isPaused) {
-        time++;
-        const minutes = Math.floor(time / 60).toString().padStart(2, '0');
-        const seconds = (time % 60).toString().padStart(2, '0');
-        timerDisplay.textContent = `${minutes}:${seconds}`;
+$sum = $a + $b; // Вычисляем сумму переменных $a и $b
+echo "<p>Результат сложения \$a и \$b: $sum</p>"; // Выводим результат сложения
+?>
 
-        if (time >= gameDuration) {
-            endGame();
-        }
-    }
-}
+<?php
+// 5.5 Добавление комментариев
+// Комментарий к переменной $a
+$a = 5; // Присваиваем переменной $a значение 5
 
-// Пауза игры
-function pauseGame() {
-    if (!isPaused) {
-        clearInterval(timerInterval); // Останавливаем таймер
-        isPaused = true;
-        const pauseMessage = document.createElement("div");
-        pauseMessage.id = "pauseMessage";
-        pauseMessage.textContent = "Пауза";
-        gameScreen.appendChild(pauseMessage);
-        clickCircle.removeEventListener("click", handleClick); // Отключаем обработчик кликов
-    }
-}
+// Комментарий к переменной $b
+$b = 10; // Присваиваем переменной $b значение 10
 
-// Возобновление игры
-function resumeGame() {
-    if (isPaused) {
-        isPaused = false;
-        const pauseMessage = document.getElementById("pauseMessage");
-        if (pauseMessage) {
-            pauseMessage.remove(); // Убираем сообщение "Пауза"
-        }
-        timerInterval = setInterval(updateTimer, 1000); // Запускаем таймер
-        clickCircle.addEventListener("click", handleClick); // Включаем обработчик кликов
-    }
-}
+// Комментарий к вычислению суммы
+$sum = $a + $b; // Вычисляем сумму переменных $a и $b
 
-// Обработчик нажатия клавиши пробел
-document.addEventListener("keydown", function (event) {
-    if (event.code === "Space") {
-        if (isPaused) {
-            resumeGame(); // Возобновляем игру, если она на паузе
-        } else {
-            pauseGame(); // Ставим игру на паузу
-        }
-    }
-});
-
-// Завершение игры
-function endGame() {
-    clearInterval(timerInterval);
-    clickCircle.removeEventListener("click", handleClick);
-    gameScreen.classList.remove("active");
-    resultsScreen.classList.add("active");
-    updateLeaderboard();
-}
-
-// Обновление таблицы рекордов
-let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
-
-function updateLeaderboard() {
-    leaderboard.push({ name: playerName, score: score });
-    leaderboard.sort((a, b) => b.score - a.score);
-    leaderboard = leaderboard.slice(0, 5); // Оставляем только 5 лучших результатов
-    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-
-    leaderboardBody.innerHTML = "";
-    leaderboard.forEach((entry, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.name}</td>
-            <td>${entry.score}</td>
-        `;
-        leaderboardBody.appendChild(row);
-    });
-}
+// Комментарий к выводу результата

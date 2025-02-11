@@ -1,48 +1,56 @@
 <?php
-function calculateRoot($x, $n) {
-    if (!is_numeric($x) || !is_numeric($n)) {
-        return "Ошибка: Введите числовые значения для X и степени.";
-    }
-    if ($n == 0) {
-        return "Ошибка: Степень не может быть равна 0.";
-    }
-    if ($n % 2 == 0 && $x < 0) {
-        return "Ошибка: Невозможно вычислить корень четной степени из отрицательного числа в вещественных числах.";
+function calculateFunctionY($x, $a) {
+    if (!is_numeric($x) || !is_numeric($a)) {
+        return "Ошибка: Введите числовые значения для X и A.";
     }
 
-    return pow($x, 1/$n);
+    if ($x < 0) {
+        if ($x == 0) { // Избегаем деления на ноль, хотя по условию x < 0, но на всякий случай.
+            return "Ошибка: Деление на ноль при x = 0 и x < 0 (не должно произойти).";
+        }
+        return $a / $x;
+    } else { // x >= 0
+        if ($a - $x < 0) {
+            return "Ошибка: Выражение под корнем отрицательное (a - x < 0).";
+        }
+        $denominator = sqrt($a - $x);
+        if ($denominator == 0) {
+            return "Ошибка: Деление на ноль, корень равен 0 (a - x = 0).";
+        }
+        return 1 / $denominator;
+    }
 }
 
-// Получаем значения из GET-параметров для тестирования через браузер
-$x = isset($_GET['x']) ? $_GET['x'] : null;
-$n = isset($_GET['n']) ? $_GET['n'] : null;
-$result = null;
+// Получаем значения из GET-параметров
+$x_func = isset($_GET['x_func']) ? $_GET['x_func'] : null;
+$a_func = isset($_GET['a_func']) ? $_GET['a_func'] : null;
+$result_func = null;
 
-if ($x !== null && $n !== null) {
-    $result = calculateRoot($x, $n);
+if ($x_func !== null && $a_func !== null) {
+    $result_func = calculateFunctionY($x_func, $a_func);
 }
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Вычисление корня степени</title>
+    <title>Вычисление функции Y</title>
 </head>
 <body>
-    <h1>Вычисление корня степени</h1>
+    <h1>Вычисление функции Y</h1>
     <form method="get">
-        <label for="x">Число X:</label>
-        <input type="text" name="x" id="x" value="<?php echo htmlspecialchars($x); ?>"><br><br>
+        <label for="x_func">Значение X:</label>
+        <input type="text" name="x_func" id="x_func" value="<?php echo htmlspecialchars($x_func); ?>"><br><br>
 
-        <label for="n">Степень корня (n):</label>
-        <input type="text" name="n" id="n" value="<?php echo htmlspecialchars($n); ?>"><br><br>
+        <label for="a_func">Значение A:</label>
+        <input type="text" name="a_func" id="a_func" value="<?php echo htmlspecialchars($a_func); ?>"><br><br>
 
-        <input type="submit" value="Вычислить корень">
+        <input type="submit" value="Вычислить Y">
     </form>
 
-    <?php if ($result !== null): ?>
-        <h2>Результат:</h2>
-        <p><?php echo $result; ?></p>
+    <?php if ($result_func !== null): ?>
+        <h2>Результат функции Y:</h2>
+        <p><?php echo $result_func; ?></p>
     <?php endif; ?>
 </body>
 </html>

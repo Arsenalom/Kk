@@ -1,73 +1,31 @@
 <?php
 function isLeapYear($year) {
-    if (!is_numeric($year)) {
-        return "Ошибка: Год должен быть числом.";
-    }
-    if (($year % 4 == 0 && $year % 100 != 0) || $year % 400 == 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return ($year % 4 == 0 && $year % 100 != 0) || ($year % 400 == 0);
 }
 
 function getDaysInMonth($month, $year) {
-    if (!is_numeric($month) || !is_numeric($year)) {
-        return "Ошибка: Месяц и год должны быть числами.";
+    // *Добавляем проверку корректности месяца*
+    if (!is_int($month) || $month < 1 || $month > 12) {
+        return "Ошибка: Некорректный номер месяца. Месяц должен быть от 1 до 12."; // Возвращаем сообщение об ошибке
     }
-    if ($month < 1 || $month > 12) {
-        return "Ошибка: Месяц должен быть в диапазоне от 1 до 12.";
+    // *Можно добавить проверку года, если необходимо (например, на положительное число)*
+    if (!is_int($year) || $year < 0) { // Пример проверки года на неотрицательное значение
+        return "Ошибка: Некорректный год. Год должен быть неотрицательным числом."; // Возвращаем сообщение об ошибке
     }
 
-    $daysInMonth = 0;
-    switch ($month) {
-        case 2: // Февраль
-            $daysInMonth = isLeapYear($year) ? 29 : 28;
-            break;
-        case 4:  // Апрель
-        case 6:  // Июнь
-        case 9:  // Сентябрь
-        case 11: // Ноябрь
-            $daysInMonth = 30;
-            break;
-        default: // Остальные месяцы
-            $daysInMonth = 31;
+    if ($month == 2) {
+        return isLeapYear($year) ? 29 : 28;
+    } elseif (in_array($month, [4, 6, 9, 11])) {
+        return 30;
+    } else {
+        return 31;
     }
-    return $daysInMonth;
 }
 
-// Получаем значения из GET-параметров
-$month = isset($_GET['month']) ? $_GET['month'] : null;
-$year = isset($_GET['year']) ? $_GET['year'] : null;
-$leapYearResult = null;
-$daysInMonthResult = null;
-
-if ($month !== null && $year !== null) {
-    $leapYearResult = isLeapYear($year);
-    $daysInMonthResult = getDaysInMonth($month, $year);
-}
+// Пример использования
+$year = 2024;
+$month = 13; // Некорректный месяц
+$isLeap = isLeapYear($year) ? "високосный" : "не високосный";
+$days = getDaysInMonth($month, $year);
+echo "Год $year - $isLeap, в месяце $month дней: $days"; // Теперь выведет сообщение об ошибке
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Високосный год и дни в месяце</title>
-</head>
-<body>
-    <h1>Високосный год и дни в месяце</h1>
-    <form method="get">
-        <label for="month">Месяц (число от 1 до 12):</label>
-        <input type="text" name="month" id="month" value="<?php echo htmlspecialchars($month); ?>"><br><br>
-
-        <label for="year">Год:</label>
-        <input type="text" name="year" id="year" value="<?php echo htmlspecialchars($year); ?>"><br><br>
-
-        <input type="submit" value="Определить">
-    </form>
-
-    <?php if ($leapYearResult !== null && $daysInMonthResult !== null): ?>
-        <h2>Результат:</h2>
-        <p>Год <?php echo htmlspecialchars($year); ?> является високосным: <?php echo $leapYearResult === true ? 'Да' : 'Нет'; ?></p>
-        <p>Количество дней в месяце <?php echo htmlspecialchars($month); ?>: <?php echo $daysInMonthResult; ?></p>
-    <?php endif; ?>
-</body>
-</html>

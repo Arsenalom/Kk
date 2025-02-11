@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+    <h2>Отображение кода нажатой клавиши</h2>
+    <p>Нажмите любую клавишу, чтобы увидеть её код в консоли.</p>
+
+
+    <h2>Кнопки-стрелки</h2>
+    <div class="arrow-buttons">
+        <div class="arrow-button" id="up">↑</div>
+        <div class="arrow-button" id="left">←</div>
+        <div class="arrow-button" id="down">↓</div>
+        <div class="arrow-button" id="right">→</div>
+        
+    </div>
+
+    <h2> Перемещение объекта</h2>
+    <canvas id="objectCanvas" width="400" height="200"></canvas>
+
+ 
+    <h2> Игра "Пинг-понг"</h2>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+   
+    <script src="js.js"></script>
+</body>
+</html>

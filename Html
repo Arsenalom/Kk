@@ -1,69 +1,20 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
-    <style>
-        .screen {
-            display: none;
-            text-align: center;
-            padding: 20px;
+<?php
+// Функция для вывода таблицы умножения
+function printMultiplicationTable($size = 10) {
+    echo "<table border='1'>";
+    for ($i = 1; $i <= $size; $i++) {
+        echo "<tr>";
+        for ($j = 1; $j <= $size; $j++) {
+            echo "<td>" . $i * $j . "</td>";
         }
-        .active {
-            display: block;
-        }
-        #clickCircle {
-            width: 100px;
-            height: 100px;
-            background-color: red;
-            border-radius: 50%;
-            margin: 20px auto;
-            cursor: pointer;
-        }
-        #pauseMessage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-    <!-- Экран приветствия -->
-    <div id="welcomeScreen" class="screen active">
-        <h1>Добро пожаловать!</h1>
-        <input type="text" id="playerNameInput" placeholder="Введите ваше имя">
-        <button id="startGame">Начать игру</button>
-    </div>
+        echo "</tr>";
+    }
+    echo "</table>";
+}
 
-    <!-- Экран игры -->
-    <div id="gameScreen" class="screen">
-        <h2 id="playerNameDisplay"></h2>
-        <p id="timerDisplay">00:00</p>
-        <p id="scoreDisplay">Счет: 0</p>
-        <div id="clickCircle"></div>
-        <button id="exitGame">Выйти из игры</button>
-    </div>
+// Получение размера таблицы из GET-запроса
+$size = isset($_GET['size']) ? intval($_GET['size']) : 10;
 
-    <!-- Экран результатов -->
-    <div id="resultsScreen" class="screen">
-        <h2>Таблица рекордов</h2>
-        <table id="leaderboardTable">
-            <thead>
-                <tr>
-                    <th>Место</th>
-                    <th>Имя</th>
-                    <th>Счет</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboardBody"></tbody>
-        </table>
-        <button id="backToWelcome">На главный экран</button>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+// Вывод таблицы
+printMultiplicationTable($size);
+?>

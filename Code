@@ -1,31 +1,53 @@
 <?php
-function isLeapYear($year) {
-    return ($year % 4 == 0 && $year % 100 != 0) || ($year % 400 == 0);
+// Подключение всех сценариев
+include 'number_info.php';
+include 'multiplication_table.php';
+include 'power_calculation.php';
+
+// Вывод формы для ввода данных
+echo "<h1>Тестирование PHP-сценариев</h1>";
+
+// Форма для задачи 5.1
+echo "<h2>Задача 5.1: Количество цифр и сумма цифр числа</h2>";
+echo "<form method='GET' action=''>
+        Введите натуральное число: <input type='number' name='number' required>
+        <input type='submit' value='Рассчитать'>
+      </form>";
+
+if (isset($_GET['number'])) {
+    $number = intval($_GET['number']);
+    echo "<h3>Результат:</h3>";
+    include 'number_info.php';
 }
 
-function getDaysInMonth($month, $year) {
-    // *Добавляем проверку корректности месяца*
-    if (!is_int($month) || $month < 1 || $month > 12) {
-        return "Ошибка: Некорректный номер месяца. Месяц должен быть от 1 до 12."; // Возвращаем сообщение об ошибке
-    }
-    // *Можно добавить проверку года, если необходимо (например, на положительное число)*
-    if (!is_int($year) || $year < 0) { // Пример проверки года на неотрицательное значение
-        return "Ошибка: Некорректный год. Год должен быть неотрицательным числом."; // Возвращаем сообщение об ошибке
-    }
+// Форма для задачи 5.2
+echo "<h2>Задача 5.2: Таблица умножения</h2>";
+echo "<form method='GET' action=''>
+        Введите размер таблицы (по умолчанию 10): <input type='number' name='size'>
+        <input type='submit' value='Показать таблицу'>
+      </form>";
 
-    if ($month == 2) {
-        return isLeapYear($year) ? 29 : 28;
-    } elseif (in_array($month, [4, 6, 9, 11])) {
-        return 30;
-    } else {
-        return 31;
-    }
+if (isset($_GET['size'])) {
+    $size = intval($_GET['size']);
+    echo "<h3>Результат:</h3>";
+    include 'multiplication_table.php';
+} else {
+    echo "<h3>Результат (по умолчанию 10x10):</h3>";
+    include 'multiplication_table.php';
 }
 
-// Пример использования
-$year = 2024;
-$month = 13; // Некорректный месяц
-$isLeap = isLeapYear($year) ? "високосный" : "не високосный";
-$days = getDaysInMonth($month, $year);
-echo "Год $year - $isLeap, в месяце $month дней: $days"; // Теперь выведет сообщение об ошибке
+// Форма для задачи 5.3
+echo "<h2>Задача 5.3: Возведение в степень</h2>";
+echo "<form method='GET' action=''>
+        Введите число (a): <input type='number' step='any' name='a' required>
+        Введите степень (x): <input type='number' name='x' required>
+        <input type='submit' value='Рассчитать'>
+      </form>";
+
+if (isset($_GET['a']) && isset($_GET['x'])) {
+    $a = floatval($_GET['a']);
+    $x = intval($_GET['x']);
+    echo "<h3>Результат:</h3>";
+    include 'power_calculation.php';
+}
 ?>

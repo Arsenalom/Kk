@@ -1,51 +1,51 @@
-USE [BookShop];
+USE BookShop;
 GO
 
--- 5.1 Получить все данные обо всех книгах
-SELECT '5.1 - Все данные о книгах' AS [Задание];
-SELECT * FROM [dbo].[Book];
+-- 5.1 Get all data about all books
+SELECT '5.1 - All book data' AS Task;
+SELECT * FROM Book;
 GO
 
--- 5.2 Получить ФИО авторов в одном столбце
-SELECT '5.2 - ФИО авторов' AS [Задание];
-SELECT [Surname] + ' ' + [Name] AS [ФИО автора] FROM [dbo].[Author];
+-- 5.2 Get author full names in one column
+SELECT '5.2 - Author full names' AS Task;
+SELECT last_name + ' ' + first_name AS FullName FROM Author;
 GO
 
--- 5.3 Получить уникальные страны авторов по алфавиту
-SELECT '5.3 - Уникальные страны авторов' AS [Задание];
-SELECT DISTINCT [Country] AS [Страна] 
-FROM [dbo].[Author]
-ORDER BY [Country] ASC;
+-- 5.3 Get unique author countries in alphabetical order
+SELECT '5.3 - Unique author countries' AS Task;
+SELECT DISTINCT country AS Country 
+FROM Author
+ORDER BY country ASC;
 GO
 
--- 5.4 Получить данные о книгах с 5% скидкой
-SELECT '5.4 - Книги с 5% скидкой' AS [Задание];
+-- 5.4 Get book data with 5% discount
+SELECT '5.4 - Books with 5% discount' AS Task;
 SELECT 
-    [BookId] AS [Идентификатор книги],
-    [Title] AS [Название книги],
-    ROUND([Price] * 0.95, 2) AS [Цена со скидкой 5%]
-FROM [dbo].[Book]
-ORDER BY [Цена со скидкой 5%] DESC, [Title] ASC;
+    book_id AS BookID,
+    title AS BookTitle,
+    ROUND(price * 0.95, 2) AS DiscountedPrice
+FROM Book
+ORDER BY DiscountedPrice DESC, title ASC;
 GO
 
--- 5.5 Получить статистику по книгам
-SELECT '5.5 - Общая статистика по книгам' AS [Задание];
+-- 5.5 Get book statistics
+SELECT '5.5 - Book statistics' AS Task;
 SELECT 
-    COUNT(*) AS [Количество книг],
-    MIN([Price]) AS [Минимальная цена],
-    MAX([Price]) AS [Максимальная цена],
-    CAST(AVG([Price]) AS DECIMAL(10,2)) AS [Средняя цена]
-FROM [dbo].[Book];
+    COUNT(*) AS BookCount,
+    MIN(price) AS MinPrice,
+    MAX(price) AS MaxPrice,
+    CAST(AVG(price) AS DECIMAL(10,2)) AS AvgPrice
+FROM Book;
 GO
 
--- 5.6 Получить статистику по жанрам
-SELECT '5.6 - Статистика по жанрам' AS [Задание];
+-- 5.6 Get statistics by genre
+SELECT '5.6 - Genre statistics' AS Task;
 SELECT 
-    [Genre] AS [Жанр],
-    MAX([Price]) AS [Максимальная цена],
-    MIN([Price]) AS [Минимальная цена],
-    COUNT(*) AS [Количество книг]
-FROM [dbo].[Book]
-GROUP BY [Genre]
-ORDER BY [Жанр];
+    genre AS Genre,
+    MAX(price) AS MaxPrice,
+    MIN(price) AS MinPrice,
+    COUNT(*) AS BookCount
+FROM Book
+GROUP BY genre
+ORDER BY genre;
 GO

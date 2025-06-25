@@ -1,0 +1,60 @@
+USE [BookShop];
+GO
+
+-- 5.1 Округление цен книг до десятков
+UPDATE [dbo].[Book]
+SET [Price] = ROUND([Price], -1);
+GO
+
+-- 5.2 Количество заказов по месяцам (сортировка по убыванию даты)
+SELECT 
+    YEAR([OrderDateTime]) AS [Год],
+    MONTH([OrderDateTime]) AS [Месяц],
+    COUNT(*) AS [Количество заказов]
+FROM 
+    [dbo].[Order]
+GROUP BY 
+    YEAR([OrderDateTime]),
+    MONTH([OrderDateTime])
+ORDER BY 
+    YEAR([OrderDateTime]) DESC,
+    MONTH([OrderDateTime]) DESC;
+GO
+
+-- 5.3 Покупатели: код, фамилия и инициал имени в верхнем регистре
+SELECT 
+    [CustomerId] AS [Код покупателя],
+    UPPER([Surname]) + ' ' + UPPER(LEFT([Name], 1)) + '.' AS [ФИО]
+FROM 
+    [dbo].[Customer];
+GO
+
+-- 5.4 Очистка логинов (удаление пробелов по краям, замена внутренних на _)
+UPDATE [dbo].[Customer]
+SET [Login] = REPLACE(LTRIM(RTRIM([Login])), ' ', '_');
+GO
+
+-- 5.5 Информация о покупателях с заменой NULL телефона на прочерк
+SELECT 
+    [CustomerId],
+    [Login],
+    [Surname],
+    [Name],
+    [Address],
+    ISNULL([Phone], '–') AS [Phone]
+FROM 
+    [dbo].[Customer];
+GO
+
+-- 5.6 Список книг, сгруппированных по авторам
+SELECT 
+    a.[Surname] + ' ' + a.[Name] AS [Автор],
+    STRING_AGG(b.[Title], ', ') WITHIN GROUP (ORDER BY b.[Title]) AS [Книги]
+FROM 
+    [dbo].[Book] b
+    JOIN [dbo].[Author] a ON b.[AuthorId] = a.[AuthorId]
+GROUP BY 
+    a.[Surname], a.[Name]
+ORDER BY 
+    [Автор];
+GO

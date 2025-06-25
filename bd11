@@ -1,38 +1,37 @@
--- 1. Подключаемся к базе данных BookShop
-USE [BookShop]
+USE BookShop;
 GO
 
--- 5.1 Вставить новую книгу (только обязательные поля)
-INSERT INTO [dbo].[Book] ([AuthorId], [Title], [Genre], [Price], [Weight], [PageCount])
-VALUES (1, N'Новая книга Пушкина', N'проза', 500.00, 0.300, 200);
+-- 5.1 Insert new book (only required fields)
+INSERT INTO Book (author_id, title, genre, price, weight, page_count)
+VALUES (1, 'New Pushkin Book', 'prose', 500.00, 0.300, 200);
 GO
 
--- 5.2 Удалить заказчиков без адреса
-DELETE FROM [dbo].[Customer] 
-WHERE [Address] IS NULL OR LTRIM(RTRIM([Address])) = '';
+-- 5.2 Delete customers without an address
+DELETE FROM Customer 
+WHERE address IS NULL OR LTRIM(RTRIM(address)) = '';
 GO
 
--- 5.3 Изменить цену книг с названием «Сказки»
-UPDATE [dbo].[Book] 
-SET [Price] = [Price] - 100
-WHERE [Title] LIKE N'%Сказки%';
+-- 5.3 Update price for books with "Fairy Tales" in title
+UPDATE Book 
+SET price = price - 100
+WHERE title LIKE '%Fairy Tales%';
 GO
 
--- 5.4 Создать таблицу «Проза» с книгами этого жанра
-IF OBJECT_ID('dbo.Проза', 'U') IS NOT NULL
-    DROP TABLE [dbo].[Проза];
+-- 5.4 Create "Prose" table with books of this genre
+IF OBJECT_ID('dbo.Prose', 'U') IS NOT NULL
+    DROP TABLE Prose;
 
 SELECT 
-    [Title] AS [Наименование книги],
-    [Price] AS [Цена],
-    [Weight] AS [Масса],
-    [ReleaseYear] AS [Год выпуска]
-INTO [dbo].[Проза]
-FROM [dbo].[Book]
-WHERE [Genre] = N'проза';
+    title AS BookTitle,
+    price AS Price,
+    weight AS Weight,
+    release_year AS ReleaseYear
+INTO Prose
+FROM Book
+WHERE genre = 'prose';
 GO
 
--- 5.5 Удалить из таблицы «Проза» книги дороже 1000 рублей
-DELETE FROM [dbo].[Проза]
-WHERE [Цена] > 1000;
+-- 5.5 Delete from "Prose" table books more expensive than 1000
+DELETE FROM Prose
+WHERE Price > 1000;
 GO

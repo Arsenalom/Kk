@@ -1,92 +1,92 @@
-USE [BookShop];
+USE BookShop;
 GO
 
--- 5.1 Сведения о книгах: код, название, автор, цена
-SELECT '5.1 - Сведения о книгах' AS Задание;
+-- 5.1 Book details: ID, title, author, price
+SELECT '5.1 - Book Details' AS Task;
 SELECT 
-    b.BookId AS [Код книги],
-    b.Title AS [Название],
-    a.Surname + ' ' + a.Name AS [Автор],
-    b.Price AS [Цена]
+    b.book_id AS BookID,
+    b.title AS Title,
+    a.last_name + ' ' + a.first_name AS Author,
+    b.price AS Price
 FROM 
-    Book b
-    JOIN Author a ON b.AuthorId = a.AuthorId;
+    book b
+    JOIN author a ON b.author_id = a.author_id;
 GO
 
--- 5.2 Состав заказов: номер, книга, автор, цена, количество, стоимость
-SELECT '5.2 - Состав заказов' AS Задание;
+-- 5.2 Order contents: order number, book, author, price, quantity, total
+SELECT '5.2 - Order Contents' AS Task;
 SELECT 
-    o.OrderId AS [Номер заказа],
-    b.BookId AS [Код книги],
-    b.Title AS [Название],
-    a.Surname + ' ' + a.Name AS [Автор],
-    b.Price AS [Цена],
-    ob.Quantity AS [Количество],
-    (b.Price * ob.Quantity) AS [Стоимость]
+    o.order_id AS OrderNumber,
+    b.book_id AS BookID,
+    b.title AS Title,
+    a.last_name + ' ' + a.first_name AS Author,
+    b.price AS Price,
+    ob.quantity AS Quantity,
+    (b.price * ob.quantity) AS Total
 FROM 
-    [Order] o
-    JOIN OrderedBook ob ON o.OrderId = ob.OrderId
-    JOIN Book b ON ob.BookId = b.BookId
-    JOIN Author a ON b.AuthorId = a.AuthorId;
+    book_order o
+    JOIN ordered_book ob ON o.order_id = ob.order_id
+    JOIN book b ON ob.book_id = b.book_id
+    JOIN author a ON b.author_id = a.author_id;
 GO
 
--- 5.3 Заказы с номером, датой и общей стоимостью (сортировка по дате)
-SELECT '5.3 - Информация о заказах' AS Задание;
+-- 5.3 Orders with number, date and total amount (sorted by date)
+SELECT '5.3 - Order Information' AS Task;
 SELECT 
-    o.OrderId AS [Номер заказа],
-    o.OrderDateTime AS [Дата заказа],
-    SUM(b.Price * ob.Quantity) AS [Стоимость заказа]
+    o.order_id AS OrderNumber,
+    o.order_date AS OrderDate,
+    SUM(b.price * ob.quantity) AS OrderTotal
 FROM 
-    [Order] o
-    JOIN OrderedBook ob ON o.OrderId = ob.OrderId
-    JOIN Book b ON ob.BookId = b.BookId
+    book_order o
+    JOIN ordered_book ob ON o.order_id = ob.order_id
+    JOIN book b ON ob.book_id = b.book_id
 GROUP BY 
-    o.OrderId, o.OrderDateTime
+    o.order_id, o.order_date
 ORDER BY 
-    o.OrderDateTime DESC;
+    o.order_date DESC;
 GO
 
--- 5.4 Заказчики с количеством их заказов (включая тех, у кого нет заказов)
-SELECT '5.4 - Заказчики и их заказы' AS Задание;
+-- 5.4 Customers with their order count (including those with no orders)
+SELECT '5.4 - Customers and Their Orders' AS Task;
 SELECT 
-    c.CustomerId AS [Код заказчика],
-    c.Login AS [Логин],
-    COUNT(o.OrderId) AS [Количество заказов]
+    c.customer_id AS CustomerID,
+    c.username AS Username,
+    COUNT(o.order_id) AS OrderCount
 FROM 
-    Customer c
-    LEFT JOIN [Order] o ON c.CustomerId = o.CustomerId
+    customer c
+    LEFT JOIN book_order o ON c.customer_id = o.customer_id
 GROUP BY 
-    c.CustomerId, c.Login;
+    c.customer_id, c.username;
 GO
 
--- 5.5 Заказы без состава (пустые заказы)
-SELECT '5.5 - Пустые заказы' AS Задание;
+-- 5.5 Empty orders (orders without items)
+SELECT '5.5 - Empty Orders' AS Task;
 SELECT 
-    o.OrderId AS [Номер заказа],
-    o.OrderDateTime AS [Дата заказа],
-    c.Login AS [Логин заказчика]
+    o.order_id AS OrderNumber,
+    o.order_date AS OrderDate,
+    c.username AS CustomerUsername
 FROM 
-    [Order] o
-    JOIN Customer c ON o.CustomerId = c.CustomerId
+    book_order o
+    JOIN customer c ON o.customer_id = c.customer_id
 WHERE 
-    NOT EXISTS (SELECT 1 FROM OrderedBook WHERE OrderId = o.OrderId);
+    NOT EXISTS (SELECT 1 FROM ordered_book WHERE order_id = o.order_id);
 GO
 
--- 5.6 Общий список авторов и заказчиков с указанием типа
-SELECT '5.6 - Общий список авторов и заказчиков' AS Задание;
+-- 5.6 Combined list of authors and customers with type indicator
+SELECT '5.6 - Combined Author and Customer List' AS Task;
 SELECT 
-    Surname AS [Фамилия],
-    Name AS [Имя],
-    'Автор' AS [Тип]
+    last_name AS LastName,
+    first_name AS FirstName,
+    'Author' AS Type
 FROM 
-    Author
+    author
 UNION ALL
 SELECT 
-    Surname,
-    Name,
-    'Заказчик'
+    last_name,
+    first_name,
+    'Customer'
 FROM 
-    Customer
+    customer
 ORDER BY 
-    [Тип], [Фамилия], [Имя];
+    Type, LastName, FirstName;
 GO

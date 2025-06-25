@@ -1,60 +1,60 @@
-USE [BookShop];
+USE BookShop;
 GO
 
--- 5.1 Округление цен книг до десятков
-UPDATE [dbo].[Book]
-SET [Price] = ROUND([Price], -1);
+-- 5.1 Round book prices to tens
+UPDATE Book
+SET Price = ROUND(Price, -1);
 GO
 
--- 5.2 Количество заказов по месяцам (сортировка по убыванию даты)
+-- 5.2 Monthly order count (sorted by descending date)
 SELECT 
-    YEAR([OrderDateTime]) AS [Год],
-    MONTH([OrderDateTime]) AS [Месяц],
-    COUNT(*) AS [Количество заказов]
+    YEAR(OrderDateTime) AS Year,
+    MONTH(OrderDateTime) AS Month,
+    COUNT(*) AS OrderCount
 FROM 
-    [dbo].[Order]
+    BookOrder
 GROUP BY 
-    YEAR([OrderDateTime]),
-    MONTH([OrderDateTime])
+    YEAR(OrderDateTime),
+    MONTH(OrderDateTime)
 ORDER BY 
-    YEAR([OrderDateTime]) DESC,
-    MONTH([OrderDateTime]) DESC;
+    YEAR(OrderDateTime) DESC,
+    MONTH(OrderDateTime) DESC;
 GO
 
--- 5.3 Покупатели: код, фамилия и инициал имени в верхнем регистре
+-- 5.3 Customers: ID, surname and initial in uppercase
 SELECT 
-    [CustomerId] AS [Код покупателя],
-    UPPER([Surname]) + ' ' + UPPER(LEFT([Name], 1)) + '.' AS [ФИО]
+    CustomerID,
+    UPPER(LastName) + ' ' + UPPER(LEFT(FirstName, 1)) + '.' AS FullName
 FROM 
-    [dbo].[Customer];
+    Customer;
 GO
 
--- 5.4 Очистка логинов (удаление пробелов по краям, замена внутренних на _)
-UPDATE [dbo].[Customer]
-SET [Login] = REPLACE(LTRIM(RTRIM([Login])), ' ', '_');
+-- 5.4 Clean up logins (trim spaces, replace internal spaces with _)
+UPDATE Customer
+SET Login = REPLACE(LTRIM(RTRIM(Login)), ' ', '_');
 GO
 
--- 5.5 Информация о покупателях с заменой NULL телефона на прочерк
+-- 5.5 Customer information with NULL phone replaced by dash
 SELECT 
-    [CustomerId],
-    [Login],
-    [Surname],
-    [Name],
-    [Address],
-    ISNULL([Phone], '–') AS [Phone]
+    CustomerID,
+    Login,
+    LastName,
+    FirstName,
+    Address,
+    ISNULL(Phone, '-') AS Phone
 FROM 
-    [dbo].[Customer];
+    Customer;
 GO
 
--- 5.6 Список книг, сгруппированных по авторам
+-- 5.6 Books grouped by author
 SELECT 
-    a.[Surname] + ' ' + a.[Name] AS [Автор],
-    STRING_AGG(b.[Title], ', ') WITHIN GROUP (ORDER BY b.[Title]) AS [Книги]
+    a.LastName + ' ' + a.FirstName AS Author,
+    STRING_AGG(b.Title, ', ') WITHIN GROUP (ORDER BY b.Title) AS Books
 FROM 
-    [dbo].[Book] b
-    JOIN [dbo].[Author] a ON b.[AuthorId] = a.[AuthorId]
+    Book b
+    JOIN Author a ON b.AuthorID = a.AuthorID
 GROUP BY 
-    a.[Surname], a.[Name]
+    a.LastName, a.FirstName
 ORDER BY 
-    [Автор];
+    Author;
 GO

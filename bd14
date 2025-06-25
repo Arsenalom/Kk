@@ -1,0 +1,92 @@
+USE [BookShop];
+GO
+
+-- 5.1 Сведения о книгах: код, название, автор, цена
+SELECT '5.1 - Сведения о книгах' AS Задание;
+SELECT 
+    b.BookId AS [Код книги],
+    b.Title AS [Название],
+    a.Surname + ' ' + a.Name AS [Автор],
+    b.Price AS [Цена]
+FROM 
+    Book b
+    JOIN Author a ON b.AuthorId = a.AuthorId;
+GO
+
+-- 5.2 Состав заказов: номер, книга, автор, цена, количество, стоимость
+SELECT '5.2 - Состав заказов' AS Задание;
+SELECT 
+    o.OrderId AS [Номер заказа],
+    b.BookId AS [Код книги],
+    b.Title AS [Название],
+    a.Surname + ' ' + a.Name AS [Автор],
+    b.Price AS [Цена],
+    ob.Quantity AS [Количество],
+    (b.Price * ob.Quantity) AS [Стоимость]
+FROM 
+    [Order] o
+    JOIN OrderedBook ob ON o.OrderId = ob.OrderId
+    JOIN Book b ON ob.BookId = b.BookId
+    JOIN Author a ON b.AuthorId = a.AuthorId;
+GO
+
+-- 5.3 Заказы с номером, датой и общей стоимостью (сортировка по дате)
+SELECT '5.3 - Информация о заказах' AS Задание;
+SELECT 
+    o.OrderId AS [Номер заказа],
+    o.OrderDateTime AS [Дата заказа],
+    SUM(b.Price * ob.Quantity) AS [Стоимость заказа]
+FROM 
+    [Order] o
+    JOIN OrderedBook ob ON o.OrderId = ob.OrderId
+    JOIN Book b ON ob.BookId = b.BookId
+GROUP BY 
+    o.OrderId, o.OrderDateTime
+ORDER BY 
+    o.OrderDateTime DESC;
+GO
+
+-- 5.4 Заказчики с количеством их заказов (включая тех, у кого нет заказов)
+SELECT '5.4 - Заказчики и их заказы' AS Задание;
+SELECT 
+    c.CustomerId AS [Код заказчика],
+    c.Login AS [Логин],
+    COUNT(o.OrderId) AS [Количество заказов]
+FROM 
+    Customer c
+    LEFT JOIN [Order] o ON c.CustomerId = o.CustomerId
+GROUP BY 
+    c.CustomerId, c.Login;
+GO
+
+-- 5.5 Заказы без состава (пустые заказы)
+SELECT '5.5 - Пустые заказы' AS Задание;
+SELECT 
+    o.OrderId AS [Номер заказа],
+    o.OrderDateTime AS [Дата заказа],
+    c.Login AS [Логин заказчика]
+FROM 
+    [Order] o
+    JOIN Customer c ON o.CustomerId = c.CustomerId
+WHERE 
+    NOT EXISTS (SELECT 1 FROM OrderedBook WHERE OrderId = o.OrderId);
+GO
+
+-- 5.6 Общий список авторов и заказчиков с указанием типа
+SELECT '5.6 - Общий список авторов и заказчиков' AS Задание;
+SELECT 
+    Surname AS [Фамилия],
+    Name AS [Имя],
+    'Автор' AS [Тип]
+FROM 
+    Author
+UNION ALL
+SELECT 
+    Surname,
+    Name,
+    'Заказчик'
+FROM 
+    Customer
+ORDER BY 
+    [Тип], [Фамилия], [Имя];
+GO

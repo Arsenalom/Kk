@@ -1,0 +1,57 @@
+USE [BookShop];
+GO
+
+-- 5.1 Создание таблицы «Акции»
+CREATE TABLE [dbo].[Акции] (
+    [Код акции] INT IDENTITY(1,1) PRIMARY KEY,
+    [Название] NVARCHAR(50) NOT NULL,
+    [Описание] NVARCHAR(200) NULL,
+    [Размер скидки] INT NOT NULL,
+    [Дата начала] DATE DEFAULT GETDATE(),
+    [Дата окончания] DATE NULL
+);
+GO
+
+-- 5.2 Создание таблицы «Акционные товары» с внешними ключами
+CREATE TABLE [dbo].[Акционные товары] (
+    [Код акции] INT NOT NULL,
+    [Код книги] INT NOT NULL,
+    CONSTRAINT [PK_Акционные товары] PRIMARY KEY ([Код акции], [Код книги]),
+    CONSTRAINT [FK_Акционные товары_Акции] FOREIGN KEY ([Код акции]) 
+        REFERENCES [dbo].[Акции]([Код акции])
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT [FK_Акционные товары_Книги] FOREIGN KEY ([Код книги]) 
+        REFERENCES [dbo].[Book]([BookId])
+        ON UPDATE CASCADE
+        ON DELETE NO ACTION
+);
+GO
+
+-- 5.3 Добавление поля «Тип скидки» в таблицу «Акции»
+ALTER TABLE [dbo].[Акции]
+ADD [Тип скидки] NVARCHAR(5) NULL;
+GO
+
+-- 5.4 Добавление ограничений для поля «Тип скидки»
+ALTER TABLE [dbo].[Акции]
+ADD CONSTRAINT [DF_Акции_Тип скидки] DEFAULT '%' FOR [Тип скидки],
+    CONSTRAINT [CK_Акции_Размер скидки] CHECK ([Размер скидки] > 0);
+GO
+
+-- 5.5 Удаление связи и таблицы «Акции»
+-- Сначала находим имя ограничения внешнего ключа
+DECLARE @fk_name NVARCHAR(128);
+SELECT @fk_name = name 
+FROM sys.foreign_keys
+WHERE parent_object_id = OBJECT_ID('dbo.Акционные товары')
+AND referenced_object_id = OBJECT_ID('dbo.Акции');
+
+-- Удаляем ограничение внешнего ключа
+IF @fk_name IS NOT NULL
+    EXEC('ALTER TABLE [dbo].[Акционные товары] DROP CONSTRAINT [' + @fk_name + ']');
+GO
+
+-- Затем удаляем таблицу «Акции»
+DROP TABLE [dbo].[Акции];
+GO

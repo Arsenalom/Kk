@@ -1,4 +1,3 @@
--- Create the database
 CREATE DATABASE PrintingCompany;
 GO
 

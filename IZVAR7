@@ -1,11 +1,9 @@
--- Create the database
 CREATE DATABASE PrintingCompany;
 GO
 
 USE PrintingCompany;
 GO
 
--- Clients table
 CREATE TABLE clients (
     client_id INT IDENTITY(1,1) PRIMARY KEY,
     client_name NVARCHAR(100) NOT NULL,
@@ -17,7 +15,6 @@ CREATE TABLE clients (
 );
 GO
 
--- Product types table
 CREATE TABLE product_types (
     product_type_id INT IDENTITY(1,1) PRIMARY KEY,
     product_name NVARCHAR(50) NOT NULL,
@@ -25,7 +22,6 @@ CREATE TABLE product_types (
 );
 GO
 
--- Services table
 CREATE TABLE services (
     service_id INT IDENTITY(1,1) PRIMARY KEY,
     service_name NVARCHAR(50) NOT NULL,
@@ -34,7 +30,6 @@ CREATE TABLE services (
 );
 GO
 
--- Employees table
 CREATE TABLE employees (
     employee_id INT IDENTITY(1,1) PRIMARY KEY,
     full_name NVARCHAR(100) NOT NULL,
@@ -45,7 +40,6 @@ CREATE TABLE employees (
 );
 GO
 
--- Orders table
 CREATE TABLE orders (
     order_id INT IDENTITY(1,1) PRIMARY KEY,
     client_id INT NOT NULL,
@@ -59,7 +53,6 @@ CREATE TABLE orders (
 );
 GO
 
--- Order items table
 CREATE TABLE order_items (
     item_id INT IDENTITY(1,1) PRIMARY KEY,
     order_id INT NOT NULL,
@@ -76,7 +69,6 @@ CREATE TABLE order_items (
 );
 GO
 
--- Order services table
 CREATE TABLE order_services (
     service_id INT IDENTITY(1,1) PRIMARY KEY,
     item_id INT NOT NULL,

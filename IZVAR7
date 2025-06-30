@@ -1,3 +1,4 @@
+-- Create the database
 CREATE DATABASE PrintingCompany;
 GO
 
@@ -122,4 +123,4 @@ VALUES
     ('Petr Petrov', 'Printer', '79107654321', 'print@example.com', 'Offset printing'),
     ('Maria Sidorova', 'Technician', '79105554433', 'tech@example.com', 'Post-press processing'),
     ('Alexey Kuznetsov', 'Manager', '79103332211', 'manager@example.com', 'Project management');
-GO
+GO 

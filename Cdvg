@@ -1,0 +1,169 @@
+using System;
+using System.Diagnostics;
+using System.Windows.Forms;
+using System.Linq;
+
+namespace MiniTaskManager
+{
+    public partial class FormMain : Form
+    {
+        public FormMain()
+        {
+            InitializeComponent();
+            // Предполагаем, что у вас уже есть:
+            // tabControl1 → вкладки "Процессы" и "Приложения"
+            // listViewProcesses, listViewApplications (View = Details)
+            // labelCount
+            // кнопки: btnStart, btnKill, btnRefresh, btnKillTree
+        }
+
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+            RefreshAll();
+        }
+
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshAll();
+        }
+
+        private void RefreshAll()
+        {
+            RefreshProcesses();
+            RefreshApplications();
+        }
+
+        // ── Процессы ────────────────────────────────────────────────
+        private void RefreshProcesses()
+        {
+            listViewProcesses.Items.Clear();
+
+            var processes = Process.GetProcesses()
+                .OrderBy(p => p.ProcessName)
+                .ToList();
+
+            labelCount.Text = $"Количество процессов: {processes.Count}";
+
+            foreach (var p in processes)
+            {
+                try
+                {
+                    long memoryMB = p.WorkingSet64 / 1024 / 1024;
+
+                    var item = new ListViewItem(p.ProcessName);
+                    item.SubItems.Add(p.Id.ToString());
+                    item.SubItems.Add($"{memoryMB} MB");
+                    item.Tag = p; // сохраняем ссылку на процесс
+
+                    listViewProcesses.Items.Add(item);
+                }
+                catch
+                {
+                    // многие системные процессы вызывают исключение при обращении
+                    continue;
+                }
+            }
+        }
+
+        // ── Приложения (окна с заголовком) ──────────────────────────
+        private void RefreshApplications()
+        {
+            listViewApplications.Items.Clear();
+
+            var processes = Process.GetProcesses()
+                .Where(p =>
+                {
+                    try
+                    {
+                        return !string.IsNullOrWhiteSpace(p.MainWindowTitle);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                })
+                .OrderBy(p => p.MainWindowTitle)
+                .ToList();
+
+            foreach (var p in processes)
+            {
+                try
+                {
+                    var item = new ListViewItem(p.MainWindowTitle);
+                    item.SubItems.Add(p.StartTime.ToString("HH:mm:ss dd.MM.yyyy"));
+                    item.Tag = p;
+
+                    listViewApplications.Items.Add(item);
+                }
+                catch { }
+            }
+        }
+
+        // Завершение выбранного процесса
+        private void btnKill_Click(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab == tabPageProcesses)
+            {
+                KillSelectedProcess(listViewProcesses);
+            }
+            else if (tabControl1.SelectedTab == tabPageApplications)
+            {
+                KillSelectedProcess(listViewApplications);
+            }
+        }
+
+        private void KillSelectedProcess(ListView lv)
+        {
+            if (lv.SelectedItems.Count == 0) return;
+
+            var item = lv.SelectedItems[0];
+            var process = item.Tag as Process;
+
+            if (process == null) return;
+
+            try
+            {
+                process.Kill();
+                MessageBox.Show($"Процесс {process.ProcessName} ({process.Id}) завершён", "Успех");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось завершить процесс:\n{ex.Message}", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            RefreshAll();
+        }
+
+        // Запуск новой задачи
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            using (var form = new FormStartProcess())
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        Process.Start(form.FileName, form.Arguments);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Ошибка запуска", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+
+            RefreshAll();
+        }
+
+        // Завершить дерево процессов (сложно и опасно!)
+        private void btnKillTree_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Функция «Завершить дерево процессов»\nреализуется по желанию преподавателя.\nОчень опасно для системы!",
+                "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            // Если всё же нужно → смотрите ProcessModule + WMI или сторонние библиотеки
+            // В учебных целях обычно достаточно простого .Kill()
+        }
+    }
+}

@@ -1,0 +1,386 @@
+Важные предварительные замечания
+
+Все программы написаны для 64-битной Linux-системы (самый распространённый вариант сейчас).
+Для ввода-вывода используются простые макросы или прямые вызовы syscall.
+Компиляция и запуск (Linux):Bashnasm -f elf64 prog.asm -o prog.o
+ld prog.o -o prog
+./prog
+Если у вас Windows — лучше использовать NASM + GoLink или MinGW + ld, или SASM.
+
+5.1. Частное и остаток от деления a / b
+nasm; lab5_1.asm
+; Частное и остаток от деления a / b
+
+section .data
+    msg1     db "Введите a: ", 0
+    msg1len  equ $ - msg1
+    msg2     db "Введите b: ", 0
+    msg2len  equ $ - msg2
+    msg_res  db "Частное: ", 0
+    msg_res_len equ $ - msg_res
+    msg_rem  db 10, "Остаток: ", 0
+    msg_rem_len equ $ - msg_rem
+    newline  db 10, 0
+
+section .bss
+    a       resq 1
+    b       resq 1
+    buf     resb 32
+
+section .text
+global _start
+
+_start:
+    ; вывод "Введите a: "
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg1
+    mov rdx, msg1len
+    syscall
+
+    ; чтение a
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, buf
+    mov rdx, 31
+    syscall
+
+    call str_to_int
+    mov [a], rax
+
+    ; вывод "Введите b: "
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg2
+    mov rdx, msg2len
+    syscall
+
+    ; чтение b
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, buf
+    mov rdx, 31
+    syscall
+
+    call str_to_int
+    mov [b], rax
+
+    ; деление
+    mov rax, [a]
+    cqo                     ; расширение знака rax → rdx:rax
+    idiv qword [b]          ; rax = частное, rdx = остаток
+
+    push rdx                ; сохраняем остаток
+
+    ; вывод "Частное: "
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg_res
+    mov rdx, msg_res_len
+    syscall
+
+    mov rax, [rsp+8]        ; частное
+    call print_int
+
+    ; вывод "Остаток: "
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg_rem
+    mov rdx, msg_rem_len
+    syscall
+
+    pop rax                 ; остаток
+    call print_int
+
+    ; новая строка
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, newline
+    mov rdx, 1
+    syscall
+
+    ; выход
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+
+
+; --------------------------------------------------
+; str_to_int : rsi -> rax (преобразование строки в число)
+; --------------------------------------------------
+str_to_int:
+    xor rax, rax
+    xor rcx, rcx
+.loop:
+    movzx rbx, byte [rsi + rcx]
+    cmp rbx, 10
+    je .done
+    cmp rbx, 0
+    je .done
+    sub rbx, '0'
+    imul rax, 10
+    add rax, rbx
+    inc rcx
+    jmp .loop
+.done:
+    ret
+
+
+; --------------------------------------------------
+; print_int : rax -> вывод числа
+; --------------------------------------------------
+print_int:
+    push rbp
+    mov rbp, rsp
+    sub rsp, 32
+
+    mov rdi, rsp
+    add rdi, 31
+    mov byte [rdi], 0
+    dec rdi
+
+    mov rcx, 10
+    test rax, rax
+    jns .positive
+    neg rax
+    mov byte [rdi], '-'
+    dec rdi
+.positive:
+
+.convert:
+    xor rdx, rdx
+    div rcx
+    add dl, '0'
+    mov [rdi], dl
+    dec rdi
+    test rax, rax
+    jnz .convert
+
+    inc rdi
+    mov rsi, rdi
+    mov rdx, rbp
+    sub rdx, rdi
+    add rdx, 32
+
+    mov rax, 1
+    mov rdi, 1
+    syscall
+
+    mov rsp, rbp
+    pop rbp
+    ret
+5.2. y = a·x² + b·x + c  (вставка в C или отдельная программа)
+Самый простой вариант — полностью на ассемблере:
+nasm; lab5_2.asm
+; y = a*x*x + b*x + c
+
+section .data
+    fmt_in   db "%ld %ld %ld %ld", 0        ; a x b c
+    fmt_out  db "y = %ld", 10, 0
+    msg      db "Введите a x b c: ", 0
+
+section .bss
+    a resq 1
+    x resq 1
+    b resq 1
+    c resq 1
+    y resq 1
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    push rbp
+    mov rbp, rsp
+
+    ; вывод приглашения
+    mov rdi, msg
+    xor rax, rax
+    call printf
+
+    ; ввод a x b c
+    mov rdi, fmt_in
+    mov rsi, a
+    mov rdx, x
+    mov rcx, b
+    mov r8,  c
+    xor rax, rax
+    call scanf
+
+    ; вычисление
+    mov rax, [x]
+    imul rax, [x]           ; x²
+    imul rax, [a]           ; a·x²
+
+    mov rbx, [x]
+    imul rbx, [b]           ; b·x
+    add rax, rbx
+
+    add rax, [c]            ; + c
+
+    mov [y], rax
+
+    ; вывод
+    mov rdi, fmt_out
+    mov rsi, [y]
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    leave
+    ret
+Компиляция:
+Bashnasm -f elf64 lab5_2.asm -o lab5_2.o
+gcc lab5_2.o -o lab5_2
+./lab5_2
+5.3. Чётное / нечётное → 1 / 0
+nasm; lab5_3.asm
+; 1 — чётное, 0 — нечётное
+
+section .data
+    msg      db "Введите число: ", 0
+    msg_yes  db "1 (четное)", 10, 0
+    msg_no   db "0 (нечетное)", 10, 0
+
+section .bss
+    num resq 1
+    buf resb 32
+
+section .text
+global _start
+
+_start:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg
+    mov rdx, 14
+    syscall
+
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, buf
+    mov rdx, 31
+    syscall
+
+    call str_to_int
+    mov [num], rax
+
+    ; проверка младшего бита
+    test al, 1
+    jz .even
+
+.odd:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg_no
+    mov rdx, 13
+    syscall
+    jmp .exit
+
+.even:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, msg_yes
+    mov rdx, 11
+    syscall
+
+.exit:
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+
+
+; str_to_int — см. выше (копировать из 5.1)
+5.4. Байты → килобайты (size / 1024)
+nasm; lab5_4.asm
+section .data
+    msg      db "Размер файла (байт): ", 0
+    msg_out  db " = %ld Кбайт", 10, 0
+
+section .bss
+    size resq 1
+    buf  resb 32
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    sub rsp, 8
+
+    mov rdi, msg
+    xor rax, rax
+    call printf
+
+    mov rdi, "%ld"
+    mov rsi, size
+    xor rax, rax
+    call scanf
+
+    mov rax, [size]
+    mov rbx, 1024
+    cqo
+    idiv rbx                ; rax = Кбайт
+
+    mov rdi, msg_out
+    mov rsi, rax
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    add rsp, 8
+    ret
+5.5. RGB → одно 24-битное число
+nasm; lab5_5.asm
+; R G B → 0xRRGGBB
+
+section .data
+    fmt_in   db "%d %d %d", 0          ; R G B
+    fmt_out  db "0x%06X", 10, 0
+    prompt   db "R G B (0-255): ", 0
+
+section .bss
+    r resd 1
+    g resd 1
+    b resd 1
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    sub rsp, 8
+
+    mov rdi, prompt
+    xor rax, rax
+    call printf
+
+    mov rdi, fmt_in
+    mov rsi, r
+    mov rdx, g
+    mov rcx, b
+    xor rax, rax
+    call scanf
+
+    ; собираем цвет: R<<16 | G<<8 | B
+    mov eax, [r]
+    shl eax, 16
+
+    mov edx, [g]
+    shl edx, 8
+    or  eax, edx
+
+    or  eax, [b]           ; eax = 0xRRGGBB
+
+    mov rdi, fmt_out
+    mov rsi, rax
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    add rsp, 8
+    ret

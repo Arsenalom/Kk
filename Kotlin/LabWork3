@@ -1,0 +1,85 @@
+fun main() {
+    while (true) {
+        println("\n=== Задачи по Kotlin ===")
+        println("1  → Арифметические операции")
+        println("2  → Индекс массы тела (ИМТ)")
+        println("3  → Секунды → чч:мм:сс")
+        println("4  → Високосный год?")
+        println("5  → Площадь кольца")
+        println("0  → Выход")
+        print("Выберите задачу → ")
+
+        when (readln().trim()) {
+            "1" -> task1()
+            "2" -> task2()
+            "3" -> task3()
+            "4" -> task4()
+            "5" -> task5()
+            "0" -> {
+                println("До свидания!")
+                return
+            }
+            else -> println("Такой задачи нет. Попробуйте ещё раз.")
+        }
+    }
+}
+
+// 1. Арифметические операции
+fun task1() {
+    print("Введите два целых числа a и b через пробел: ")
+    val (a, b) = readln().split(" ").map { it.toInt() }
+    println("$a + $b = ${a + b}")
+    println("$a - $b = ${a - b}")
+    println("$a * $b = ${a * b}")
+    println("$a / $b = ${a.toDouble() / b}")
+    println("$a % $b = ${a % b}")
+}
+
+// 2. Индекс массы тела
+fun task2() {
+    print("Введите имя: ")
+    val name = readln().trim()
+
+    print("Рост в сантиметрах: ")
+    val heightCm = readln().toInt()
+
+    print("Вес в килограммах: ")
+    val weightKg = readln().toDouble()
+
+    val heightM = heightCm / 100.0
+    val imt = weightKg / (heightM * heightM)
+    println("$name, ваш ИМТ = ${"%.2f".format(imt)}")
+}
+
+// 3. Секунды → чч:мм:сс
+fun task3() {
+    print("Введите количество секунд с начала суток: ")
+    var seconds = readln().toLong()
+    seconds %= 86400
+    if (seconds < 0) seconds += 86400
+
+    val h = seconds / 3600
+    val m = (seconds % 3600) / 60
+    val s = seconds % 60
+    println("%02d:%02d:%02d".format(h, m, s))
+}
+
+// 4. Високосный год
+fun task4() {
+    print("Введите год: ")
+    val year = readln().toInt()
+    val isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+    println(if (isLeap) "true  (високосный)" else "false  (не високосный)")
+}
+
+// 5. Площадь кольца — изменённые имена переменных
+fun task5() {
+    print("Внешний радиус: ")
+    val Rradius = readln().toDouble()
+
+    print("Внутренний радиус: ")
+    val Radius = readln().toDouble()
+
+    val area = Math.PI * (Rradius * Rradius - Radius * Radius)
+
+    println("Площадь кольца: %.3f".format(area))

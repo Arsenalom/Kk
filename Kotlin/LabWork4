@@ -1,0 +1,178 @@
+import kotlin.math.*
+
+fun main() {
+    while (true) {
+        println("\n=== Практические задачи ===")
+        println("1  → Год, месяц: високосный / дней / сезон")
+        println("2  → Треугольник: существует? равносторонний/равнобедренный?")
+        println("3  → Конвертер валют (RUB → USD/EUR)")
+        println("4  → Вычисление функции y(x) по кускам")
+        println("5  → Магазин: скидка, сдача / доплата")
+        println("0  → Выход")
+        print("Выберите задачу → ")
+
+        when (readln().trim()) {
+            "1" -> task1()
+            "2" -> task2()
+            "3" -> task3()
+            "4" -> task4()
+            "5" -> task5()
+            "0" -> {
+                println("До свидания!")
+                return
+            }
+            else -> println("Неверный выбор. Попробуйте снова.")
+        }
+    }
+}
+
+fun task1() {
+    print("Введите год: ")
+    val year = readln().toIntOrNull() ?: run {
+        println("Некорректный год"); return
+    }
+
+    print("Введите номер месяца (1–12): ")
+    val month = readln().toIntOrNull() ?: run {
+        println("Некорректный месяц"); return
+    }
+
+    if (month !in 1..12) {
+        println("Месяц должен быть от 1 до 12"); return
+    }
+
+    // високосный год
+    val isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+    println(if (isLeap) "Год високосный" else "Год не високосный")
+
+    // количество дней в месяце
+    val daysInMonth = when (month) {
+        2 -> if (isLeap) 29 else 28
+        4, 6, 9, 11 -> 30
+        else -> 31
+    }
+    println("В этом месяце $daysInMonth дней")
+
+    // сезон
+    val season = when (month) {
+        12, 1, 2 -> "зима"
+        in 3..5 -> "весна"
+        in 6..8 -> "лето"
+        in 9..11 -> "осень"
+        else -> "???"
+    }
+    println("Сезон: $season")
+}
+
+fun task2() {
+    print("Введите три стороны через пробел: ")
+    val input = readln().split(" ").mapNotNull { it.toDoubleOrNull() }
+    if (input.size != 3) {
+        println("Нужно ввести ровно три числа"); return
+    }
+
+    val (a, b, c) = input.sorted()  // a ≤ b ≤ c
+
+    if (a <= 0 || b <= 0 || c <= 0) {
+        println("Стороны должны быть положительными"); return
+    }
+
+    if (a + b <= c) {
+        println("Треугольник с такими сторонами НЕ существует"); return
+    }
+
+    println("Треугольник существует")
+
+    when {
+        a == b && b == c -> println("Равносторонний")
+        a == b || b == c || a == c -> println("Равнобедренный")
+        else -> println("Обычный (разносторонний)")
+    }
+}
+
+fun task3() {
+    val USD_RATE = 92.45
+    val EUR_RATE = 101.02
+
+    print("Введите сумму в рублях: ")
+    val rub = readln().toDoubleOrNull() ?: run {
+        println("Некорректная сумма"); return
+    }
+
+    if (rub < 0) {
+        println("Сумма не может быть отрицательной"); return
+    }
+
+    print("Введите валюту (usd / eur): ")
+    val currency = readln().trim().lowercase()
+
+    val result = when (currency) {
+        "usd" -> rub / USD_RATE
+        "eur" -> rub / EUR_RATE
+        else -> {
+            println("Поддерживаются только usd и eur")
+            println("Исходная сумма: %.2f ₽".format(rub))
+            return
+        }
+    }
+
+    println("%.2f %s".format(result, currency.uppercase()))
+}
+
+fun task4() {
+    print("Введите a: ")
+    val a = readln().toDoubleOrNull() ?: run { println("Некорректное a"); return }
+
+    print("Введите x: ")
+    val x = readln().toDoubleOrNull() ?: run { println("Некорректное x"); return }
+
+    val y = when {
+        x < 0 -> a + x.pow(3)
+        x < 3 -> sin(x) + cos(x)
+        x < 5 -> {
+            if (a - x == 0.0) {
+                println("Деление на ноль (a - x = 0)"); return
+            }
+            1.0 / (a - x)
+        }
+        else -> {
+            if (x - a < 0) {
+                println("Невозможно извлечь корень из отрицательного числа (x - a < 0)"); return
+            }
+            sqrt(x - a)
+        }
+    }
+
+    println("y(%.3f) = %.3f".format(x, y))
+}
+
+fun task5() {
+    print("Сумма покупки (₽): ")
+    val total = readln().toDoubleOrNull() ?: run { println("Некорректная сумма"); return }
+
+    if (total <= 0) {
+        println("Сумма покупки должна быть больше 0"); return
+    }
+
+    print("Внесено (₽): ")
+    val paid = readln().toDoubleOrNull() ?: run { println("Некорректная сумма"); return }
+
+    val discountPercent = when {
+        total > 5000 -> 10.0
+        total > 1000 -> 5.0
+        else -> 0.0
+    }
+
+    val discount = total * discountPercent / 100
+    val toPay = total - discount
+
+    println("Сумма к оплате со скидкой ${discountPercent.toInt()}%: ${"%.2f".format(toPay)} ₽")
+
+    val diff = paid - toPay
+
+    when {
+        abs(diff) < 0.01 -> println("Спасибо!")
+        diff > 0 -> println("Возьмите сдачу: %.2f ₽".format(diff))
+        else -> println("Требуется доплатить: %.2f ₽".format(-diff))
+    }
+}

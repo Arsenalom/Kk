@@ -1,0 +1,308 @@
+5.1. Сравнение двух переменных — equal / not equal
+nasm; lab-branch-5.1.asm
+; Сравнение двух чисел
+
+section .data
+    fmt_in   db "%ld %ld", 0              ; два числа
+    msg_eq   db "equal", 10, 0
+    msg_ne   db "not equal", 10, 0
+    prompt   db "Введите два числа: ", 0
+
+section .bss
+    a resq 1
+    b resq 1
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    push rbp
+    mov rbp, rsp
+
+    ; приглашение
+    mov rdi, prompt
+    xor rax, rax
+    call printf
+
+    ; ввод двух чисел
+    mov rdi, fmt_in
+    mov rsi, a
+    mov rdx, b
+    xor rax, rax
+    call scanf
+
+    mov rax, [a]
+    cmp rax, [b]
+    je .equal
+
+    mov rdi, msg_ne
+    jmp .print
+
+.equal:
+    mov rdi, msg_eq
+
+.print:
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    leave
+    ret
+5.2. Проверка диапазона (4 < x < 14)
+nasm; lab-branch-5.2.asm
+
+section .data
+    fmt      db "%ld", 0
+    msg_in   db "Введите число: ", 0
+    msg_yes  db "within range (4..14)", 10, 0
+    msg_no   db "out of range", 10, 0
+
+section .bss
+    x resq 1
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    push rbp
+    mov rbp, rsp
+
+    mov rdi, msg_in
+    xor rax, rax
+    call printf
+
+    mov rdi, fmt
+    mov rsi, x
+    xor rax, rax
+    call scanf
+
+    mov rax, [x]
+
+    cmp rax, 4
+    jle .out
+
+    cmp rax, 14
+    jge .out
+
+    mov rdi, msg_yes
+    jmp .print
+
+.out:
+    mov rdi, msg_no
+
+.print:
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    leave
+    ret
+5.3. Вывод наибольшего из трёх чисел
+nasm; lab-branch-5.3.asm
+
+section .data
+    fmt      db "%ld %ld %ld", 0
+    msg_in   db "Введите три числа: ", 0
+    fmt_out  db "Наибольшее: %ld", 10, 0
+
+section .bss
+    a resq 1
+    b resq 1
+    c resq 1
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    push rbp
+    mov rbp, rsp
+
+    mov rdi, msg_in
+    xor rax, rax
+    call printf
+
+    mov rdi, fmt
+    mov rsi, a
+    mov rdx, b
+    mov rcx, c
+    xor rax, rax
+    call scanf
+
+    mov rax, [a]
+    cmp rax, [b]
+    jge .skip1
+    mov rax, [b]
+.skip1:
+    cmp rax, [c]
+    jge .print
+    mov rax, [c]
+
+.print:
+    mov rdi, fmt_out
+    mov rsi, rax
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    leave
+    ret
+5.4. Вычисление кусочной функции
+texty = a·x²     если x < -10
+y = a·|x|    если -10 ≤ x < 10
+y = a - x    если x ≥ 10
+nasm; lab-branch-5.4.asm
+
+section .data
+    fmt_in   db "%ld %ld", 0          ; a x
+    fmt_out  db "y = %ld", 10, 0
+    prompt   db "Введите a и x: ", 0
+
+section .bss
+    a resq 1
+    x resq 1
+    y resq 1
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    push rbp
+    mov rbp, rsp
+
+    mov rdi, prompt
+    xor rax, rax
+    call printf
+
+    mov rdi, fmt_in
+    mov rsi, a
+    mov rdx, x
+    xor rax, rax
+    call scanf
+
+    mov rbx, [x]          ; rbx = x
+    mov rcx, [a]          ; rcx = a
+
+    cmp rbx, -10
+    jl .case1
+
+    cmp rbx, 10
+    jl .case2
+
+    ; case3: x ≥ 10
+    mov rax, rcx
+    sub rax, rbx
+    jmp .output
+
+.case1: ; x < -10 → a * x * x
+    mov rax, rbx
+    imul rax, rbx         ; x²
+    imul rax, rcx         ; a·x²
+    jmp .output
+
+.case2: ; -10 ≤ x < 10 → a * |x|
+    mov rax, rbx
+    cmp rax, 0
+    jge .noabs
+    neg rax
+.noabs:
+    imul rax, rcx         ; a · |x|
+    jmp .output
+
+.output:
+    mov [y], rax
+
+    mov rdi, fmt_out
+    mov rsi, [y]
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    leave
+    ret
+5.5. Оплата покупки со сдачей / доплатой
+nasm; lab-branch-5.5.asm
+
+section .data
+    fmt_in   db "%ld %ld", 0               ; сумма покупки, внесено
+    fmt_out  db "%s %ld руб.", 10, 0
+    msg_ok   db "Оплата прошла успешно", 0
+    msg_sda  db "Ваша сдача:", 0
+    msg_dop  db "Недостаточно. Доплатите:", 0
+    prompt   db "Сумма покупки и внесено: ", 0
+
+section .bss
+    price resq 1
+    paid  resq 1
+    diff  resq 1
+
+section .text
+extern printf
+extern scanf
+global main
+
+main:
+    push rbp
+    mov rbp, rsp
+
+    mov rdi, prompt
+    xor rax, rax
+    call printf
+
+    mov rdi, fmt_in
+    mov rsi, price
+    mov rdx, paid
+    xor rax, rax
+    call scanf
+
+    mov rax, [paid]
+    sub rax, [price]
+    mov [diff], rax
+
+    cmp rax, 0
+    je .ok
+    jg .change
+    jl .need_more
+
+.ok:
+    mov rdi, fmt_out
+    mov rsi, msg_ok
+    xor rdx, rdx            ; 0 руб.
+    jmp .print
+
+.change:
+    mov rdi, fmt_out
+    mov rsi, msg_sda
+    mov rdx, [diff]
+    jmp .print
+
+.need_more:
+    mov rdi, fmt_out
+    mov rsi, msg_dop
+    mov rdx, [diff]
+    neg rdx                 ; делаем положительным
+
+.print:
+    xor rax, rax
+    call printf
+
+    xor rax, rax
+    leave
+    ret
+Как запускать в SASM
+
+Создайте новый проект в SASM
+Выберите NASM + x64 (64-bit)
+Вставьте код одного из заданий
+Нажмите «Собрать и запустить»
+
+Если в SASM возникают проблемы с линковкой — проверьте настройки:
+«Настройки → Ассемблер → NASM» и «Линкер → gcc»
+Удачи с лабораторной и с отладкой в SASM!

@@ -1,0 +1,202 @@
+import kotlin.random.Random
+import kotlin.math.abs
+
+fun main() {
+    while (true) {
+        println("\n=== ЛАБОРАТОРНАЯ РАБОТА: ЦИКЛЫ В KOTLIN ===")
+        println("Выберите задание:")
+        println(" 1  →  Таблица Цельсий → Фаренгейт (100 → -50)")
+        println(" 2  →  Таблица y = a*x + b (по возрастанию x)")
+        println(" 3  →  Таблица квадратов двузначных чисел")
+        println(" 4  →  Таблица умножения 1–9")
+        println(" 5  →  Деление с проверкой делителя ≠ 0")
+        println(" 6  →  Сколько лет до миллиона на вкладе")
+        println(" 7  →  Покупка / сдача / долг")
+        println(" 8  →  Угадай число 1–10")
+        println(" 9  →  Проверка 8 ферзей на шахматной доске")
+        println(" 0  →  Выход")
+        print("\nВаш выбор: ")
+
+        when (readLine()?.trim()) {
+            "1" -> celsiusToFahrenheit()
+            "2" -> linearFunctionTable()
+            "3" -> squaresTable()
+            "4" -> multiplicationTable()
+            "5" -> safeDivision()
+            "6" -> millionaireYears()
+            "7" -> shopChangeCalculator()
+            "8" -> guessNumberGame()
+            "9" -> queensAttackCheck()
+            "0" -> {
+                println("До свидания!")
+                return
+            }
+            else -> println("Неверный выбор. Попробуйте снова.")
+        }
+    }
+}
+
+// 5.1.1 — Цельсий → Фаренгейт
+fun celsiusToFahrenheit() {
+    println("\n=== Температура °C → °F ===")
+    print("Введите шаг (например 5, 10): ")
+    val step = readLine()?.toIntOrNull() ?: 10
+
+    println("\n°C\t°F")
+    println("----------------")
+    for (c in 100 downTo -50 step step) {
+        val f = c * 1.8 + 32
+        println("$c\t${"%.1f".format(f)}")
+    }
+}
+
+// 5.1.2 — y = a*x + b
+fun linearFunctionTable() {
+    println("\n=== Таблица функции y = a·x + b ===")
+    print("a = "); val a = readLine()?.toDoubleOrNull() ?: 0.0
+    print("b = "); val b = readLine()?.toDoubleOrNull() ?: 0.0
+    print("x1 = "); var x1 = readLine()?.toDoubleOrNull() ?: 0.0
+    print("x2 = "); var x2 = readLine()?.toDoubleOrNull() ?: 10.0
+
+    if (x1 > x2) x1 = x2.also { x2 = x1 }
+
+    println("\nx\t\ty")
+    println("-------------------")
+    for (x in x1.toInt()..x2.toInt()) {
+        val y = a * x + b
+        println("$x\t\t${"%.2f".format(y)}")
+    }
+}
+
+// 5.2.1 — Квадраты двузначных чисел
+fun squaresTable() {
+    println("\n=== Квадраты двузначных чисел ===")
+    print("\t")
+    repeat(10) { print("$it\t") }
+    println()
+
+    for (tens in 1..9) {
+        print("$tens\t")
+        for (units in 0..9) {
+            val n = tens * 10 + units
+            print("${n * n}\t")
+        }
+        println()
+    }
+}
+
+// 5.2.2 — Таблица умножения
+fun multiplicationTable() {
+    println("\n=== Таблица умножения 1–9 ===")
+    print("   |")
+    for (i in 1..9) print(" $i\t")
+    println("\n---+--------------------------------")
+
+    for (i in 1..9) {
+        print("$i  |")
+        for (j in 1..9) print(" ${i * j}\t")
+        println()
+    }
+}
+
+// 5.3.1 — Деление с проверкой
+fun safeDivision() {
+    println("\n=== Деление чисел ===")
+    print("Делимое a = ");
+    val a = readLine()?.toDoubleOrNull() ?: 0.0
+
+    var b: Double
+    do {
+        print("Делитель b (≠ 0) = ")
+        b = readLine()?.toDoubleOrNull() ?: 0.0
+        if (b == 0.0) println("Ошибка: деление на ноль! Повторите.")
+    } while (b == 0.0)
+
+    println("$a / $b = ${a / b}")
+}
+
+// 5.3.2 — Миллионер
+fun millionaireYears() {
+    println("\n=== Сколько лет до миллиона ===")
+    print("Начальная сумма = ");
+    var sum = readLine()?.toDoubleOrNull() ?: 10000.0
+    print("Годовой процент (например 7.5) = ");
+    val rate = (readLine()?.toDoubleOrNull() ?: 5.0) / 100
+
+    var years = 0
+    println("\nГод\tСумма")
+    println("----------------")
+
+    while (sum < 1_000_000) {
+        years++
+        sum *= (1 + rate)
+        println("$years\t${"%.2f".format(sum)}")
+    }
+
+    println("\nСтанете миллионером через $years лет (сумма ≈ ${"%.2f".format(sum)})")
+}
+
+// 5.4.1 — Покупка и сдача
+fun shopChangeCalculator() {
+    println("\n=== Расчёт сдачи ===")
+    print("Сумма покупки = "); val price = readLine()?.toDoubleOrNull() ?: 0.0
+
+    var paid: Double
+    do {
+        print("Внесено = "); paid = readLine()?.toDoubleOrNull() ?: 0.0
+        if (paid < price) {
+            println("Недостаточно! Ещё нужно ${"%.2f".format(price - paid)}")
+        }
+    } while (paid < price)
+
+    if (paid == price) println("Спасибо за покупку!")
+    else println("Возьмите сдачу: ${"%.2f".format(paid - price)}")
+}
+
+// 5.4.2 — Угадай число
+fun guessNumberGame() {
+    val secret = (1..10).random()
+    println("\n=== Угадай число (1–10) ===")
+    println("Я загадал число от 1 до 10. Попробуй угадать!")
+
+    var guess: Int
+    do {
+        print("Твой вариант: ")
+        guess = readLine()?.toIntOrNull() ?: 0
+
+        when {
+            guess < secret -> println("Бери больше")
+            guess > secret -> println("Бери меньше")
+            else -> println("Молодец! Угадал!")
+        }
+    } while (guess != secret)
+}
+
+// 5.5 — 8 ферзей
+fun queensAttackCheck() {
+    println("\n=== Проверка 8 ферзей (не бьют ли друг друга) ===")
+    println("Введите координаты ферзей (строка и столбец 1–8)")
+
+    val queens = Array(8) { IntArray(2) }
+
+    for (i in 0 until 8) {
+        print("Ферзь ${i+1} строка (1-8): "); queens[i][0] = readLine()?.toIntOrNull() ?: 1
+        print("Ферзь ${i+1} столбец (1-8): "); queens[i][1] = readLine()?.toIntOrNull() ?: 1
+    }
+
+    var hasAttack = false
+
+    for (i in 0 until 7) {
+        for (j in i+1 until 8) {
+            val (r1, c1) = queens[i]
+            val (r2, c2) = queens[j]
+
+            if (r1 == r2 || c1 == c2 || abs(r1 - r2) == abs(c1 - c2)) {
+                hasAttack = true
+                println("→ Ферзи №${i+1} ($r1,$c1) и №${j+1} ($r2,$c2) бьют друг друга")
+            }
+        }
+    }
+
+    println(if (hasAttack) "\nЕсть конфликты!" else "\nРасстановка безопасна — ферзи не бьют друг друга.")
+}

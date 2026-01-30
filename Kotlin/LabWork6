@@ -1,0 +1,82 @@
+mport kotlin.math.PI
+import kotlin.math.pow
+
+// 5.1 n-ый член арифметической прогрессии
+
+fun arithmeticTerm(
+    n: Int,
+    first: Double = 0.0,
+    diff: Double = 1.0
+): Double {
+    if (n < 1) return 0.0
+    return first + (n - 1) * diff
+}
+
+// 5.2 Перегруженные функции для площади квадрата и прямоугольника
+fun area(side: Double): Double {
+    return side * side
+}
+
+fun area(length: Double, width: Double): Double {
+    return length * width
+}
+
+// 5.3 Среднее арифметическое набора чисел
+fun average(vararg numbers: Double): Double {
+    if (numbers.isEmpty()) return 0.0
+    return numbers.sum() / numbers.size
+}
+
+// 5.4 Функция высшего порядка, возвращающая лямбду в зависимости от типа процентов ("simple" / "compound")
+fun getInterestCalculator(type: String): (Double, Double, Int) -> Double {
+    return when (type.lowercase()) {
+        "simple" -> { s0, r, n ->
+            s0 + s0 * (r / 100) * n   // S = S₀ + S₀ × r × n
+        }
+        "compound", "сложные" -> { s0, r, n ->
+            s0 * (1 + r / 100).pow(n)   // S = S₀ × (1 + r)^n
+        }
+        else -> { _, _, _ -> 0.0 }   // или можно выбросить исключение
+    }
+}
+
+// 5.5 Функция-замыкание для добавления товара в корзину
+fun createCartItem(productName: String, price: Double): (Int) -> Unit {
+    return { quantity ->
+        val total = price * quantity
+        println("В корзину добавлен $productName (${quantity} шт.) на сумму $total")
+    }
+}
+
+// Тестирование всех функций
+fun main() {
+    println("5.1 а) Арифметическая прогрессия")
+    println("3-й член: ${arithmeticTerm(3)}")                
+    println("5-й член при a=10, d=3: ${arithmeticTerm(5, 10.0, 3.0)}")
+
+    println("\n5.2 а) Площади")
+    println("Площадь квадрата 5×5: ${area(5.0)}")
+    println("Площадь прямоугольника 6×4: ${area(6.0, 4.0)}")
+
+    println("\n5.3 а) Среднее арифметическое")
+    println("Среднее [1,5,3,8]: ${average(1.0, 5.0, 3.0, 8.0)}")
+    println("Среднее одного числа: ${average(7.0)}")
+    println("Среднее пустое: ${average()}")
+
+    println("\n5.4 Функция высшего порядка")
+    val simpleCalc = getInterestCalculator("simple")
+    val compoundCalc = getInterestCalculator("compound")
+
+    println("Простые  10000р, 8%%, 3 года → %.2f".format(simpleCalc(10000.0, 8.0, 3)))
+    // 10000 + 10000*0.08*3 = 12400
+    println("Сложные 10000р, 8%%, 3 года → %.2f".format(compoundCalc(10000.0, 8.0, 3)))
+    // 10000 * (1.08)^3 ≈ 12597.12
+
+    println("\n5.5 Замыкание")
+    val addMilk = createCartItem("Молоко 2.5%", 78.50)
+    val addBread = createCartItem("Хлеб Дарницкий", 45.90)
+
+    addMilk(2)      // Молоко 2шт. на сумму 157.0
+    addBread(1)     // Хлеб 1шт. на сумму 45.9
+    addMilk(3)      // Молоко 3шт. на сумму 235.5
+}

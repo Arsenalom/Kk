@@ -1,0 +1,35 @@
+%include "io.inc"
+
+section .data
+    prompt db "Введите N: ", 0
+    space  db " ", 0
+
+section .bss
+    N resd 1
+
+section .text
+    global CMAIN
+
+CMAIN:
+    PRINT_STRING prompt
+    NEWLINE
+    GET_UDEC 4, [N]
+
+    mov eax, 1              ; i = 1
+
+loop_start:
+    mov ebx, eax
+    imul ebx, ebx           ; ebx = i*i
+    cmp ebx, [N]
+    ja  finish              ; > N → выход (ja для unsigned)
+
+    PRINT_DEC 4, ebx
+    PRINT_STRING space
+
+    inc eax
+    jmp loop_start
+
+finish:
+    NEWLINE
+    xor eax, eax
+    ret

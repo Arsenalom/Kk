@@ -1,0 +1,35 @@
+%include "io64.inc"
+
+section .data
+    prompt db "Введите N: ", 0
+    spc    db " ", 0
+
+section .bss
+    N resq 1
+
+section .text
+    global CMAIN
+
+CMAIN:
+    PRINT_STRING prompt
+    NEWLINE
+    GET_UDEC 8, [N]
+
+    mov rax, 1                  ; i = 1
+
+loop_begin:
+    mov rbx, rax
+    imul rbx, rbx               ; квадрат
+    cmp rbx, [N]
+    ja  finish                  ; > N → выход (ja для unsigned)
+
+    PRINT_DEC 8, rbx
+    PRINT_STRING spc
+
+    inc rax
+    jmp loop_begin
+
+finish:
+    NEWLINE
+    xor rax, rax
+    ret

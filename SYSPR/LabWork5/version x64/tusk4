@@ -1,0 +1,68 @@
+%include "io64.inc"
+
+section .data
+    p_sum    db "Введите начальную сумму: ", 0
+    p_rate   db "Процент годовых: ", 0
+    txt_year db "Год ", 0
+    txt_col  db ": ", 0
+    txt_res  db "Миллионер через ", 0
+    txt_yrs  db " лет", 0
+    million  dq 1000000
+
+section .bss
+    sum     resq 1
+    rate    resq 1
+    years   resq 1
+
+section .text
+    global CMAIN
+
+CMAIN:
+    PRINT_STRING p_sum
+    NEWLINE
+    GET_UDEC 8, [sum]
+
+    PRINT_STRING p_rate
+    NEWLINE
+    GET_UDEC 8, [rate]
+
+    mov qword [years], 0
+
+    ; вывод нулевого года
+    PRINT_DEC 8, [years]
+    PRINT_STRING txt_col
+    PRINT_DEC 8, [sum]
+    NEWLINE
+
+invest_loop:
+    mov rax, [sum]
+    cmp rax, [million]
+    jae done
+
+    ; sum = sum * (100 + rate) / 100
+    mov rbx, [rate]
+    add rbx, 100
+    imul rax, rbx               ; sum * (100 + %)
+    mov rbx, 100
+    xor rdx, rdx
+    div rbx                     ; / 100
+    mov [sum], rax
+
+    inc qword [years]
+
+    PRINT_STRING txt_year
+    PRINT_DEC 8, [years]
+    PRINT_STRING txt_col
+    PRINT_DEC 8, [sum]
+    NEWLINE
+
+    jmp invest_loop
+
+done:
+    PRINT_STRING txt_res
+    PRINT_DEC 8, [years]
+    PRINT_STRING txt_yrs
+    NEWLINE
+
+    xor rax, rax
+    ret

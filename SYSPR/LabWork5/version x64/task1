@@ -1,0 +1,35 @@
+%include "io64.inc"
+
+section .data
+    prompt db "Введите количество строк: ", 0
+
+section .bss
+    rows resq 1
+
+section .text
+    global CMAIN
+
+CMAIN:
+    PRINT_STRING prompt
+    NEWLINE
+    GET_UDEC 8, [rows]          ; unsigned 64-bit ввод
+
+    mov rbx, 1                  ; строка №1
+
+outer_loop:
+    cmp rbx, [rows]
+    jg  end_program
+
+    mov rcx, rbx                ; сколько символов #
+
+inner_loop:
+    PRINT_CHAR '#'
+    loop inner_loop             ; rcx--, jnz
+
+    NEWLINE
+    inc rbx
+    jmp outer_loop
+
+end_program:
+    xor rax, rax
+    ret

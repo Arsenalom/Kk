@@ -1,0 +1,42 @@
+%include "io64.inc"
+
+section .data
+    prompt  db "Угадайте число (1–100): ", 0
+    too_low db "Слишком мало! Берите больше.", 0
+    too_high db "Слишком много! Берите меньше.", 0
+    success db "Молодец! Угадали!", 0
+    secret  dq 42               ; загаданное число (можно поменять)
+
+section .bss
+    guess resq 1
+
+section .text
+    global CMAIN
+
+CMAIN:
+try_again:
+    PRINT_STRING prompt
+    NEWLINE
+    GET_DEC 8, [guess]
+
+    mov rax, [guess]
+    cmp rax, [secret]
+    je  win
+
+    jl  smaller
+
+bigger:
+    PRINT_STRING too_high
+    NEWLINE
+    jmp try_again
+
+smaller:
+    PRINT_STRING too_low
+    NEWLINE
+    jmp try_again
+
+win:
+    PRINT_STRING success
+    NEWLINE
+    xor rax, rax
+    ret

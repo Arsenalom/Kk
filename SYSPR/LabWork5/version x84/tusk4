@@ -1,0 +1,68 @@
+%include "io.inc"
+
+section .data
+    p_sum     db "Сумма вклада: ", 0
+    p_perc    db "Процент годовых: ", 0
+    txt_year  db "Год ", 0
+    txt_colon db ": ", 0
+    txt_mil   db "Станет миллионером через ", 0
+    txt_years db " лет", 0
+    million   dd 1000000
+
+section .bss
+    sum     resd 1
+    percent resd 1
+    years   resd 1
+
+section .text
+    global CMAIN
+
+CMAIN:
+    PRINT_STRING p_sum
+    NEWLINE
+    GET_UDEC 4, [sum]
+
+    PRINT_STRING p_perc
+    NEWLINE
+    GET_UDEC 4, [percent]
+
+    mov dword [years], 0
+
+    ; начальная сумма
+    PRINT_DEC 4, [years]
+    PRINT_STRING txt_colon
+    PRINT_DEC 4, [sum]
+    NEWLINE
+
+loop_invest:
+    mov eax, [sum]
+    cmp eax, [million]
+    jae finished
+
+    ; sum = sum * (100 + percent) / 100
+    mov ebx, [percent]
+    add ebx, 100
+    imul eax, ebx           ; sum * (100 + %)
+    mov ebx, 100
+    xor edx, edx
+    div ebx                 ; / 100
+    mov [sum], eax
+
+    inc dword [years]
+
+    PRINT_STRING txt_year
+    PRINT_DEC 4, [years]
+    PRINT_STRING txt_colon
+    PRINT_DEC 4, [sum]
+    NEWLINE
+
+    jmp loop_invest
+
+finished:
+    PRINT_STRING txt_mil
+    PRINT_DEC 4, [years]
+    PRINT_STRING txt_years
+    NEWLINE
+
+    xor eax, eax
+    ret

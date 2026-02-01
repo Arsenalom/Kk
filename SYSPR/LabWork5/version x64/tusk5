@@ -1,0 +1,43 @@
+%include "io64.inc"
+
+section .data
+    p_n     db "Сколько чисел вводить? (>0): ", 0
+    p_val   db "Введите число: ", 0
+    p_total db "Сумма = ", 0
+
+section .bss
+    count resq 1
+    num   resq 1
+    total resq 1
+
+section .text
+    global CMAIN
+
+CMAIN:
+    mov qword [total], 0
+
+input_count:
+    PRINT_STRING p_n
+    NEWLINE
+    GET_UDEC 8, rcx             ; сразу в rcx
+    test rcx, rcx
+    jz  input_count             ; если 0 → повтор
+
+    mov [count], rcx
+
+sum_numbers:
+    PRINT_STRING p_val
+    NEWLINE
+    GET_DEC 8, [num]
+
+    mov rax, [num]
+    add [total], rax
+
+    loop sum_numbers            ; rcx--, если !=0 → повтор
+
+    PRINT_STRING p_total
+    PRINT_DEC 8, [total]
+    NEWLINE
+
+    xor rax, rax
+    ret

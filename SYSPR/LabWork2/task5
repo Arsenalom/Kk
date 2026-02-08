@@ -1,0 +1,38 @@
+%include "io64.inc"
+
+section .text
+global main
+main:
+    mov rbp, rsp                ; обязательно для SASM в x64-режиме
+
+    ; Ввод R, G, B
+    PRINT_STRING "R (0-255): "
+    GET_DEC 1, r8b              ; используем r8b, чтобы избежать проблем с ah
+
+    PRINT_STRING "G (0-255): "
+    GET_DEC 1, r9b
+
+    PRINT_STRING "B (0-255): "
+    GET_DEC 1, r10b
+
+    ; Собираем 0xRRGGBB
+    xor rax, rax
+
+    movzx rcx, r8b              ; R
+    shl rcx, 16
+    or rax, rcx
+
+    movzx rcx, r9b              ; G
+    shl rcx, 8
+    or rax, rcx
+
+    movzx rcx, r10b             ; B
+    or rax, rcx
+
+    ; Вывод
+    PRINT_STRING "Color: 0x"
+    PRINT_HEX 8, rax            ; ← здесь был ваш пропуск размера
+    NEWLINE
+
+    xor eax, eax
+    ret

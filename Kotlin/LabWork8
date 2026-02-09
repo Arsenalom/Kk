@@ -1,0 +1,170 @@
+import kotlin.random.Random
+
+// 4.1  Классы Человек и Студент
+open class Person(
+    val name: String,
+    val age: Int
+) {
+    // 4.2.2 свойство с информацией (будет переопределено)
+    open val info: String
+        get() = "Человек: $name, возраст $age лет"
+
+    // 4.2.3 метод вывода информации (будет переопределён)
+    open fun printInfo() {
+        println("Информация о человеке:")
+        println("  Имя: $name")
+        println("  Возраст: $age лет")
+    }
+
+    // 4.2.1 переопределение toString()
+    override fun toString(): String {
+        return "Person(name='$name', age=$age)"
+    }
+}
+
+class Student(
+    name: String,
+    age: Int,
+    val group: String
+) : Person(name, age) {
+
+    // 4.2.2 переопределение свойства info
+    override val info: String
+        get() = super.info + ", группа $group"
+
+    // 4.2.3 переопределение метода printInfo
+    override fun printInfo() {
+        super.printInfo()           // вызываем родительский метод
+        println("  Группа: $group") // добавляем свою строку
+    }
+
+    // 4.2.1 переопределение toString() с вызовом super
+    override fun toString(): String {
+        return super.toString().replace(")", "") + ", group='$group')"
+    }
+}
+
+// 4.3  Абстрактный класс Фигура  (предположим вариант — прямоугольник)
+abstract class Figure {
+    abstract val name: String           // абстрактное свойство
+    abstract fun getArea(): Double      // абстрактный метод площади
+    abstract fun getPerimeter(): Double // абстрактный метод периметра
+    abstract fun printInfo()            // абстрактный метод вывода
+}
+
+class Rectangle(
+    val width: Double,
+    val height: Double
+) : Figure() {
+
+    override val name: String = "Прямоугольник"
+
+    override fun getArea(): Double = width * height
+
+    override fun getPerimeter(): Double = 2 * (width + height)
+
+    override fun printInfo() {
+        println("$name:")
+        println("  ширина    = $width")
+        println("  высота    = $height")
+        println("  площадь   = ${"%.2f".format(getArea())}")
+        println("  периметр  = ${"%.2f".format(getPerimeter())}")
+    }
+}
+
+// 4.4  Обобщённый интерфейс DataSource
+interface DataSource<T> {
+    fun getNext(): T
+}
+
+class RandomDataSource : DataSource<Int> {
+    private val random = Random.Default
+
+    override fun getNext(): Int = random.nextInt(1, 101)  // 1..100
+}
+
+class StaticDataSource<T>(
+    private val items: List<T>
+) : DataSource<T> {
+    private var index = 0
+
+    override fun getNext(): T {
+        val value = items[index]
+        index = (index + 1) % items.size
+        return value
+    }
+}
+
+// вспомогательная функция для теста DataSource
+fun <T> printTenElements(source: DataSource<T>) {
+    println("Получаем 10 элементов из ${source.javaClass.simpleName}:")
+    repeat(10) {
+        print("${source.getNext()} ")
+    }
+    println("\n")
+}
+
+// 4.5  Интерфейс доставки + делегирование
+interface DeliveryService {
+    val serviceName: String
+    fun deliver(orderNumber: String)
+}
+
+class FoodService : DeliveryService {
+    override val serviceName: String = "FoodRush"
+
+    override fun deliver(orderNumber: String) {
+        println("Заказ $orderNumber передан в доставку через $serviceName")
+    }
+}
+
+// Класс приложения с делегированием интерфейса
+class DeliveryApp(
+    private val deliveryService: DeliveryService
+) : DeliveryService by deliveryService {   // делегирование
+
+    fun createOrder(orderNumber: String, customerName: String) {
+        println("Приложение: создан заказ #$orderNumber для $customerName")
+        deliver(orderNumber)  // вызываем делегированный метод
+    }
+}
+
+// Тестовый запуск
+fun main() {
+    println("=== Задание 4.1–4.2  Человек и Студент ===\n")
+
+    val p1 = Person("БАРАБАШКА", 999)
+    val s1 = Student("ТОША", 19, "РМТ-44")
+
+    println(p1)
+    println(s1)
+    println()
+
+    println(p1.info)
+    println(s1.info)
+    println()
+
+    p1.printInfo()
+    println("───────────────")
+    s1.printInfo()
+
+    println("\n=== Задание 4.3  Фигуры ===\n")
+
+    val rect = Rectangle(4.0, 7.0)
+    rect.printInfo()
+
+    println("\n=== Задание 4.4  DataSource ===\n")
+
+    val randomSource = RandomDataSource()
+    printTenElements(randomSource)
+
+    val staticSource = StaticDataSource(listOf("apple", "banana", "cherry", "date"))
+    printTenElements(staticSource)
+
+    println("\n=== Задание 4.5  Доставка + делегирование ===\n")
+
+    val foodService = FoodService()
+    val app = DeliveryApp(foodService)
+
+    app.createOrder("PUPUPU", "Гоша Рубчинский")
+}

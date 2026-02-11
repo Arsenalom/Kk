@@ -1,0 +1,231 @@
+using System;
+using System.Threading;
+
+namespace Lab_Mnogopotochnost
+{
+    class Program
+    {
+        // для задания 5.2 и 5.3
+        static int counter = 0;
+        static readonly object locker = new object();
+        static readonly Mutex mutex = new Mutex();
+
+        // для задания 5.4
+        public static string commonVar = "";
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Лабораторная по потокам. Выберите задание:");
+            Console.WriteLine("1 - Два потока: цифры и буквы");
+            Console.WriteLine("2 - Гонка без защиты (покажет баг)");
+            Console.WriteLine("3 - Гонка с lock");
+            Console.WriteLine("4 - Гонка с Mutex");
+            Console.WriteLine("5 - Обмен через общую переменную");
+            Console.WriteLine("6 - 4 потока с разными приоритетами");
+            Console.WriteLine("0 - выход");
+
+            string vybor = Console.ReadLine();
+
+            if (vybor == "1") Zadanie_5_1();
+            if (vybor == "2") Zadanie_5_2_bez_zaschiti();
+            if (vybor == "3") Zadanie_5_2_s_lock();
+            if (vybor == "4") Zadanie_5_3_s_mutex();
+            if (vybor == "5") Zadanie_5_4_obmen_dannymi();
+            if (vybor == "6") Zadanie_5_5_prioritety();
+
+            Console.WriteLine("\nГотово. Нажмите любую клавишу...");
+            Console.ReadKey();
+        }
+
+        static void Zadanie_5_1()
+        {
+            Console.WriteLine("\n=== 5.1 Два потока параллельно ===\n");
+
+            Thread potok_cifry = new Thread(Pechatat_Cifry);
+            Thread potok_bukvy = new Thread(Pechatat_Bukvy);
+
+            potok_cifry.Start();
+            potok_bukvy.Start();
+
+            potok_cifry.Join();
+            potok_bukvy.Join();
+
+            Console.WriteLine("Оба потока закончили");
+        }
+
+        static void Pechatat_Cifry()
+        {
+            for (int i = 0; i <= 9; i++)
+            {
+                Console.Write(i + " ");
+                Thread.Sleep(200);
+            }
+            Console.WriteLine();
+        }
+
+        static void Pechatat_Bukvy()
+        {
+            for (char c = 'A'; c <= 'J'; c++)
+            {
+                Console.Write(c + " ");
+                Thread.Sleep(200);
+            }
+            Console.WriteLine();
+        }
+
+        //5.2 и 5.3
+
+        static void Increment_100000_raz()
+        {
+            for (int i = 0; i < 100000; i++)
+            {
+                counter++;  
+            }
+        }
+
+        static void Increment_100000_raz_lock()
+        {
+            for (int i = 0; i < 100000; i++)
+            {
+                lock (locker)
+                {
+                    counter++;
+                }
+            }
+        }
+
+        static void Increment_100000_raz_mutex()
+        {
+            for (int i = 0; i < 100000; i++)
+            {
+                mutex.WaitOne();
+                counter++;
+                mutex.ReleaseMutex();
+            }
+        }
+
+        static void Zadanie_5_2_bez_zaschiti()
+        {
+            Console.WriteLine("\n=== Гонка без защиты ===\n");
+            counter = 0;
+
+            Thread t1 = new Thread(Increment_100000_raz);
+            Thread t2 = new Thread(Increment_100000_raz);
+
+            t1.Start(); t2.Start();
+            t1.Join(); t2.Join();
+
+            Console.WriteLine("Результат: " + counter + "  (должно быть 200000, но обычно меньше)");
+        }
+
+        static void Zadanie_5_2_s_lock()
+        {
+            Console.WriteLine("\n=== Гонка с lock ===\n");
+            counter = 0;
+
+            Thread t1 = new Thread(Increment_100000_raz_lock);
+            Thread t2 = new Thread(Increment_100000_raz_lock);
+
+            t1.Start(); t2.Start();
+            t1.Join(); t2.Join();
+
+            Console.WriteLine("Результат: " + counter + "  (должно быть ровно 200000)");
+        }
+
+        static void Zadanie_5_3_s_mutex()
+        {
+            Console.WriteLine("\n=== Гонка с Mutex ===\n");
+            counter = 0;
+
+            Thread t1 = new Thread(Increment_100000_raz_mutex);
+            Thread t2 = new Thread(Increment_100000_raz_mutex);
+
+            t1.Start(); t2.Start();
+            t1.Join(); t2.Join();
+
+            Console.WriteLine("Результат: " + counter + "  (тоже должно быть 200000)");
+        }
+
+        // 
+
+        static void Zadanie_5_4_obmen_dannymi()
+        {
+            Console.WriteLine("\n=== 5.4 Обмен данными через общую переменную ===\n");
+
+            commonVar = "";
+
+            Thread rabochiy = new Thread(MyThread);
+            rabochiy.Start();
+
+            Console.WriteLine("Главный поток: пиши что угодно, а когда захочешь закончить — напиши x");
+
+            string vvod;
+            do
+            {
+                vvod = Console.ReadLine()?.Trim().ToLower();
+            } while (vvod != "x");
+
+            commonVar = "x";
+
+            rabochiy.Join();
+            Console.WriteLine("Всё, второй поток завершился");
+        }
+
+        static void MyThread()
+        {
+            Console.WriteLine("Второй поток начал работу. Жду когда commonVar станет 'x'...");
+            int tochki = 0;
+
+            while (commonVar != "x")
+            {
+                Thread.Sleep(400);
+                Console.Write(".");
+                tochki++;
+                if (tochki % 10 == 0) Console.WriteLine();
+            }
+
+            Console.WriteLine("\nВторой поток поймал сигнал 'x' и заканчивает");
+        }
+
+        
+
+        static void Zadanie_5_5_prioritety()
+        {
+            Console.WriteLine("\n=== 5.5 Потоки с разными приоритетами ===\n");
+
+            Thread[] potoki = new Thread[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                int nomer = i + 1;
+                potoki[i] = new Thread(() => Pisat_Stroku(nomer));
+            }
+
+            potoki[0].Priority = ThreadPriority.Lowest;
+            potoki[1].Priority = ThreadPriority.BelowNormal;
+            potoki[2].Priority = ThreadPriority.Normal;
+            potoki[3].Priority = ThreadPriority.Highest;
+
+            Console.WriteLine("Запускаю 4 потока с разными приоритетами...\n");
+
+            foreach (var p in potoki) p.Start();
+
+            foreach (var p in potoki) p.Join();
+
+            Console.WriteLine("\nВсе потоки закончили");
+        }
+
+        static void Pisat_Stroku(int nomer)
+        {
+            Console.WriteLine($"Поток {nomer} запущен (приоритет = {Thread.CurrentThread.Priority})");
+
+            for (int i = 0; i < 50; i++)
+            {
+                Console.Write(nomer);
+                Thread.Sleep(30);
+            }
+
+            Console.WriteLine($"\nПоток {nomer} завершён");
+        }
+    }
+}

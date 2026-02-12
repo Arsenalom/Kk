@@ -1,0 +1,160 @@
+import kotlin.math.roundToInt
+
+fun main() {
+    //Создание, заполнение и вывод списка
+    println("Задание 5.1: Список фигур")
+
+    val figures: MutableList<String> = mutableListOf()
+
+    // 3 элемента
+    figures.addAll(listOf("Круг", "Квадрат", "Прямоугольник"))
+
+    print("Сколько фигур добавить с клавиатуры? n = ")
+    val n1 = readln().toIntOrNull() ?: 0
+
+    repeat(n1) { i ->
+        print("Фигура №${i + 1}: ")
+        val input = readln().trim()
+        if (input.isNotEmpty()) figures.add(input)
+    }
+
+    // Вывод
+    println("\nСписок фигур (${figures.size} элементов):")
+    figures.forEachIndexed { idx, fig ->
+        println("${idx + 1} – $fig")
+    }
+    println()
+
+    // 5.2 Обработка списка целых чисел
+    println(" Список целых чисел")
+
+    print("Сколько чисел ввести? n = ")
+    val n2 = readln().toIntOrNull() ?: 0
+
+    val numbers = mutableListOf<Int>()
+
+    repeat(n2) { i ->
+        print("Число №${i + 1}: ")
+        val num = readln().toIntOrNull() ?: 0
+        numbers.add(num)
+    }
+
+    // Вычисления с использованием функций коллекций
+    val indexOf100 = numbers.indexOf(100)
+    println("Индекс первого элемента равного 100: " +
+            if (indexOf100 != -1) indexOf100 else "не найден")
+
+    val sum = numbers.sum()
+    println("Сумма элементов: $sum")
+
+    val average = if (numbers.isNotEmpty()) {
+        (numbers.average() * 100).roundToInt() / 100.0
+    } else 0.0
+    println("Среднее значение: $average")
+
+    val allPositive = numbers.all { it > 0 }
+    println("Все числа больше нуля? $allPositive")
+
+    val oddValues = numbers.filter { it % 2 != 0 }
+    println("Все нечётные значения: $oddValues\n")
+
+
+    // 5.3 (дневник)
+    println("Словарь — личный дневник (дата → запись)")
+
+    val diary: MutableMap<String, String> = mutableMapOf()
+
+    // 3 записи программно
+    diary.putAll(
+        mapOf(
+            "2026-01-01" to "Новый год! Отличное настроение.",
+            "2026-02-01" to "Начало февраля, много снега.",
+            "2026-02-12" to "Делаю лабораторную работу по Kotlin."
+        )
+    )
+
+    print("Сколько записей добавить в дневник? n = ")
+    val n3 = readln().toIntOrNull() ?: 0
+
+    repeat(n3) { i ->
+        print("Дата (гггг-мм-дд): ")
+        val date = readln().trim()
+        print("Запись: ")
+        val text = readln().trim()
+        if (date.isNotEmpty() && text.isNotEmpty()) {
+            diary[date] = text
+        }
+    }
+
+    // Вывод
+    println("\nДневник (${diary.size} записей):")
+    diary.forEach { (date, entry) ->
+        println("$date – $entry")
+    }
+    println()
+
+    // 5.4 Поиск и удаление в словаре
+    println("Задание 5.4: Поиск и удаление в дневнике")
+
+    print("Введите дату для поиска: ")
+    val searchKey = readln().trim()
+
+    if (searchKey in diary) {
+        println("Найдена запись: $searchKey → ${diary[searchKey]}")
+    } else {
+        println("Запись на дату $searchKey отсутствует.")
+    }
+
+    print("Введите текст для подсчёта совпадений: ")
+    val searchValue = readln().trim()
+    val matchesCount = diary.values.count { it == searchValue }
+    println("Количество записей с таким текстом: $matchesCount")
+
+    print("Введите дату для удаления: ")
+    val keyToRemove = readln().trim()
+
+    val removed = diary.remove(keyToRemove)
+    if (removed != null) {
+        println("Запись на $keyToRemove удалена.")
+    } else {
+        println("Такой даты не было.")
+    }
+
+    println("\nДневник после удаления (${diary.size} записей):")
+    diary.forEach { (d, e) -> println("$d – $e") }
+    println()
+
+    // 5.5 Обработка множеств (пересдача зачётов)
+    println("Задание 5.5: Множества студентов на пересдаче")
+
+    val failed1 = mutableSetOf(
+        "Иванов И.И.",
+        "Петрова А.С.",
+        "Сидоров П.А.",
+        "Козлова М.В.",
+        "Васильев Д.О."
+    )
+
+    val failed2 = mutableSetOf(
+        "Сидоров П.А.",
+        "Козлова М.В.",
+        "Морозова Е.П.",
+        "Смирнов К.Л.",
+        "Васильев Д.О."
+    )
+
+    val allFailed = failed1 union failed2
+    println("Всего студентов на пересдачу: ${allFailed.size}")
+    println("Список: ${allFailed.joinToString(", ")}\n")
+
+    val failedBoth = failed1 intersect failed2
+    println("Не сдали оба зачёта: ${failedBoth.size}")
+    println("Список: ${failedBoth.joinToString(", ")}\n")
+
+    // Симметричная разность = (A - B) ∪ (B - A)
+    val failedOne = (failed1 subtract failed2) union (failed2 subtract failed1)
+    println("Не сдали ровно один зачёт: ${failedOne.size}")
+    println("Список: ${failedOne.joinToString(", ")}")
+
+    println("\nПрограмма завершена.")
+}
